@@ -22,6 +22,7 @@ let groqConversationHistory = [];
 // Conversation tracking variables
 let currentSessionId = null;
 let currentTranscription = '';
+let pendingTranscript = '';
 let conversationHistory = [];
 let screenAnalysisHistory = [];
 let currentProfile = null;
@@ -40,7 +41,49 @@ function formatSpeakerResults(results) {
     return text;
 }
 
+// Helper function to clean transcript
+function cleanTranscript(text) {
+    // Trim whitespace
+    let cleaned = text.trim();
+
+    // Return null if empty or whitespace-only
+    if (cleaned === '') {
+        return null;
+    }
+
+    // Collapse multiple spaces
+    cleaned = cleaned.replace(/\s+/g, ' ');
+
+    return cleaned;
+}
+
 module.exports.formatSpeakerResults = formatSpeakerResults;
+
+/**
+ * Internal helper: cleans the pending transcript and starts answer generation.
+ * Used both by the Live‑session generationComplete handler and by the IPC endpoint.
+ * @returns {{success: boolean, error?: string}}
+ */
+async function processPendingTranscript() {
+    if (!pendingTranscript || pendingTranscript.trim() === '') {
+        return { success: false, error: 'No pending transcript' };
+    }
+
+    const cleaned = cleanTranscript(pendingTranscript);
+    if (cleaned === null) {
+        return { success: false, error: 'Invalid transcript after cleaning' };
+    }
+
+    console.log('Final transcript:', cleaned);
+    pendingTranscript = '';
+    try {
+        await generateAnswer(cleaned);
+        return { success: true };
+    } catch (error) {
+        console.error('Error sending pending transcript:', error);
+        return { success: false, error: error.message };
+    }
+}
 
 // Audio capture variables
 let systemAudioProc = null;
@@ -206,6 +249,29 @@ function hasGroqKey() {
     return key && key.trim() != ''
 }
 
+async function generateAnswer(prompt) {
+    if (!prompt || prompt.trim() === '') {
+        console.log('Empty prompt, skipping answer generation');
+        return;
+    }
+    console.log('Using provider: Groq');
+    try {
+        await sendToGroq(prompt);
+        return;
+    } catch (groqError) {
+        console.error('Groq failed:', groqError);
+        console.log('Falling back to Gemini');
+        try {
+            await sendToGemma(prompt);
+            return;
+        } catch (gemError) {
+            console.error('Gemini also failed:', gemError);
+            // Re-throw so caller sees failure
+            throw gemError;
+        }
+    }
+}
+
 function trimConversationHistoryForGemma(history, maxChars = 42000) {
     if (!history || history.length === 0) return [];
     let totalChars = 0;
@@ -230,19 +296,19 @@ async function sendToGroq(transcription) {
     const groqApiKey = getGroqApiKey();
     if (!groqApiKey) {
         console.log('No Groq API key configured, skipping Groq response');
-        return;
+        throw new Error('No Groq API key configured');
     }
 
     if (!transcription || transcription.trim() === '') {
         console.log('Empty transcription, skipping Groq');
-        return;
+        throw new Error('Empty transcription');
     }
 
     const modelToUse = getModelForToday();
     if (!modelToUse) {
         console.log('All Groq daily limits exhausted');
         sendToRenderer('update-status', 'Groq limits reached for today');
-        return;
+        throw new Error('Groq daily limits exhausted');
     }
 
     console.log(`Sending to Groq (${modelToUse}):`, transcription.substring(0, 100) + '...');
@@ -342,6 +408,7 @@ async function sendToGroq(transcription) {
     } catch (error) {
         console.error('Error calling Groq API:', error);
         sendToRenderer('update-status', 'Groq error: ' + error.message);
+        throw error;
     }
 }
 
@@ -349,12 +416,12 @@ async function sendToGemma(transcription) {
     const apiKey = getApiKey();
     if (!apiKey) {
         console.log('No Gemini API key configured');
-        return;
+        throw new Error('No Gemini API key configured');
     }
 
     if (!transcription || transcription.trim() === '') {
         console.log('Empty transcription, skipping Gemma');
-        return;
+        throw new Error('Empty transcription');
     }
 
     console.log('Sending to Gemma:', transcription.substring(0, 100) + '...');
@@ -424,6 +491,7 @@ async function sendToGemma(transcription) {
     } catch (error) {
         console.error('Error calling Gemma API:', error);
         sendToRenderer('update-status', 'Gemma error: ' + error.message);
+        throw error;
     }
 }
 
@@ -472,7 +540,7 @@ async function initializeGeminiSession(apiKey, customPrompt = '', profile = 'int
                 onopen: function () {
                     sendToRenderer('update-status', 'Live session connected');
                 },
-                onmessage: function (message) {
+                onmessage: async function (message) {
                     console.log('----------------', message);
 
                     // Handle input transcription (what was spoken)
@@ -490,12 +558,10 @@ async function initializeGeminiSession(apiKey, customPrompt = '', profile = 'int
 
                     if (message.serverContent?.generationComplete) {
                         if (currentTranscription.trim() !== '') {
-                            if (hasGroqKey()) {
-                                sendToGroq(currentTranscription);
-                            } else {
-                                sendToGemma(currentTranscription);
-                            }
+                            pendingTranscript = currentTranscription;
                             currentTranscription = '';
+                            console.log('Transcription stored in pendingTranscript:', pendingTranscript);
+                            await processPendingTranscript();
                         }
                         messageBuffer = '';
                     }
@@ -528,7 +594,6 @@ async function initializeGeminiSession(apiKey, customPrompt = '', profile = 'int
             },
             config: {
                 responseModalities: [Modality.AUDIO],
-                outputAudioTranscription: {},
                 tools: enabledTools,
                 // Enable speaker diarization
                 inputAudioTranscription: {
@@ -1014,11 +1079,7 @@ function setupGeminiIpcHandlers(geminiSessionRef) {
         try {
             console.log('Sending text message:', text);
 
-            if (hasGroqKey()) {
-                sendToGroq(text.trim());
-            } else {
-                sendToGemma(text.trim());
-            }
+            generateAnswer(text.trim());
 
             await geminiSessionRef.current.sendRealtimeInput({ text: text.trim() });
             return { success: true };
@@ -1116,6 +1177,27 @@ function setupGeminiIpcHandlers(geminiSessionRef) {
             return { success: true };
         } catch (error) {
             console.error('Error updating Google Search setting:', error);
+            return { success: false, error: error.message };
+        }
+    });
+
+    ipcMain.handle('trigger-pending-response', async (event) => {
+        if (!pendingTranscript || pendingTranscript.trim() === '') {
+            return { success: false, error: 'No pending transcript' };
+        }
+
+        const cleaned = cleanTranscript(pendingTranscript);
+        if (cleaned === null) {
+            return { success: false, error: 'Invalid transcript after cleaning' };
+        }
+
+        console.log('Final transcript:', cleaned);
+        pendingTranscript = '';
+        try {
+            await generateAnswer(cleaned);
+            return { success: true };
+        } catch (error) {
+            console.error('Error sending pending transcript:', error);
             return { success: false, error: error.message };
         }
     });

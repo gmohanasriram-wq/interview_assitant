@@ -15,6 +15,7 @@ let hiddenVideo = null;
 let offscreenCanvas = null;
 let offscreenContext = null;
 let currentImageQuality = 'medium'; // Store current image quality for manual screenshots
+let isPushToTalk = false; // Push-to-talk state
 
 const isLinux = process.platform === 'linux';
 const isMacOS = process.platform === 'darwin';
@@ -384,10 +385,12 @@ function setupLinuxMicProcessing(micStream) {
             const pcmData16 = convertFloat32ToInt16(chunk);
             const base64Data = arrayBufferToBase64(pcmData16.buffer);
 
-            await ipcRenderer.invoke('send-mic-audio-content', {
-                data: base64Data,
-                mimeType: 'audio/pcm;rate=24000',
-            });
+            if (isPushToTalk) {
+                await ipcRenderer.invoke('send-mic-audio-content', {
+                    data: base64Data,
+                    mimeType: 'audio/pcm;rate=24000',
+                });
+            }
         }
     };
 
@@ -1050,6 +1053,28 @@ const cheatingDaddy = {
 
 // Make it globally available
 window.cheatingDaddy = cheatingDaddy;
+
+function initSpaceKeyLogging() {
+    document.addEventListener('keydown', e => {
+        if (e.code === 'Space' && !e.repeat) {
+            isPushToTalk = true;
+            console.log('SPACE DOWN');
+        }
+    });
+    document.addEventListener('keyup', e => {
+        if (e.code === 'Space') {
+            isPushToTalk = false;
+            console.log('SPACE UP');
+            // Trigger pending transcript processing
+            ipcRenderer.invoke('trigger-pending-response').catch(err => {
+                console.error('Failed to trigger pending response:', err);
+            });
+        }
+    });
+}
+
+// Initialize space key logging
+initSpaceKeyLogging();
 
 // Load theme after DOM is ready
 if (document.readyState === 'loading') {
