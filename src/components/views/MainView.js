@@ -503,10 +503,10 @@ export class MainView extends LitElement {
 
     constructor() {
         super();
-        this.onStart = () => {};
-        this.onExternalLink = () => {};
+        this.onStart = () => { };
+        this.onExternalLink = () => { };
         this.selectedProfile = 'interview';
-        this.onProfileChange = () => {};
+        this.onProfileChange = () => { };
         this.isInitializing = false;
         this.whisperDownloading = false;
 
@@ -613,7 +613,7 @@ export class MainView extends LitElement {
         const img = dCtx.createImageData(cols, rows);
         for (let i = 0; i < img.data.length; i += 4) {
             const v = Math.random() > 0.5 ? 255 : 0;
-            img.data[i] = v; img.data[i+1] = v; img.data[i+2] = v; img.data[i+3] = 255;
+            img.data[i] = v; img.data[i + 1] = v; img.data[i + 2] = v; img.data[i + 3] = 255;
         }
         dCtx.putImageData(img, 0, 0);
 
@@ -699,7 +699,7 @@ export class MainView extends LitElement {
         try {
             const creds = await cheatingDaddy.storage.getCredentials().catch(() => ({}));
             await cheatingDaddy.storage.setCredentials({ ...creds, cloudToken: val });
-        } catch (e) {}
+        } catch (e) { }
         this.requestUpdate();
     }
 
@@ -721,7 +721,7 @@ export class MainView extends LitElement {
         try {
             const creds = await cheatingDaddy.storage.getCredentials().catch(() => ({}));
             await cheatingDaddy.storage.setCredentials({ ...creds, openaiKey: val });
-        } catch (e) {}
+        } catch (e) { }
         this.requestUpdate();
     }
 
@@ -922,12 +922,12 @@ export class MainView extends LitElement {
             <div class="form-wrapper">
                 ${this._mode === 'local' ? html`
                     <div class="title-row">
-                        <div class="page-title">Cheating Daddy <span class="mode-suffix">Local AI</span></div>
+                        <div class="page-title">MeetPilot AI <span class="mode-suffix">Local AI</span></div>
                         <button class="help-btn" @click=${() => { this._showLocalHelp = !this._showLocalHelp; }}>${this._showLocalHelp ? closeIcon : helpIcon}</button>
                     </div>
                 ` : html`
                     <div class="page-title">
-                        ${html`Cheating Daddy <span class="mode-suffix">BYOK</span>`}
+                        ${html`MeetPilot AI <span class="mode-suffix">BYOK</span>`}
                     </div>
                 `}
                 <div class="page-subtitle">

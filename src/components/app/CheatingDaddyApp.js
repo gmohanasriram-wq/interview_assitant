@@ -767,10 +767,10 @@ export class CheatingDaddyApp extends LitElement {
                         .shouldAnimateResponse=${this.shouldAnimateResponse}
                         @response-index-changed=${this.handleResponseIndexChanged}
                         @response-animation-complete=${() => {
-                            this.shouldAnimateResponse = false;
-                            this._currentResponseIsComplete = true;
-                            this.requestUpdate();
-                        }}
+                        this.shouldAnimateResponse = false;
+                        this._currentResponseIsComplete = true;
+                        this.requestUpdate();
+                    }}
                     ></assistant-view>
                 `;
 
@@ -792,7 +792,7 @@ export class CheatingDaddyApp extends LitElement {
         return html`
             <div class="sidebar ${this._isLiveMode() ? 'hidden' : ''}">
                 <div class="sidebar-brand">
-                    <h1>Cheating Daddy</h1>
+                    <h1>MeetPilot AI</h1>
                 </div>
                 <nav class="sidebar-nav">
                     ${items.map(item => html`
