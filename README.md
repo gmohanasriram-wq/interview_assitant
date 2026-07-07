@@ -1,60 +1,141 @@
-<img width="1299" height="424" alt="cd (1)" src="https://github.com/user-attachments/assets/b25fff4d-043d-4f38-9985-f832ae0d0f6e" />
+# AI Interview Assistant
 
-## Recall.ai - API for desktop recording
+An Electron-based AI interview assistant that provides real-time interview support using live speech transcription, screen understanding, and LLM-powered response generation.
 
-If you’re looking for a hosted desktop recording API, consider checking out [Recall.ai](https://www.recall.ai/product/desktop-recording-sdk/?utm_source=github&utm_medium=sponsorship&utm_campaign=sohzm-cheating-daddy), an API that records Zoom, Google Meet, Microsoft Teams, in-person meetings, and more.
-
-This project is sponsored by Recall.ai.
+> **Note:** This project is based on an open-source Electron interview assistant and has been extensively enhanced with a redesigned transcript processing pipeline, Groq integration, improved push-to-talk behavior, transcript stabilization, and multiple runtime reliability improvements.
 
 ---
 
-> [!NOTE]  
-> Use latest MacOS and Windows version, older versions have limited support
-
-> [!NOTE]  
-> During testing it wont answer if you ask something, you need to simulate interviewer asking question, which it will answer
-
-A real-time AI assistant that provides contextual help during video calls, interviews, presentations, and meetings using screen capture and audio analysis.
-
 ## Features
 
-- **Live AI Assistance**: Real-time help powered by Google Gemini 2.0 Flash Live
-- **Screen & Audio Capture**: Analyzes what you see and hear for contextual responses
-- **Multiple Profiles**: Interview, Sales Call, Business Meeting, Presentation, Negotiation
-- **Transparent Overlay**: Always-on-top window that can be positioned anywhere
-- **Click-through Mode**: Make window transparent to clicks when needed
-- **Cross-platform**: Works on macOS, Windows, and Linux (kinda, dont use, just for testing rn)
+- 🎙️ Real-time speech transcription using Gemini Live
+- 🤖 Groq-powered interview answer generation
+- 🔄 Automatic Gemini fallback for improved reliability
+- 🖥️ Screenshot-based contextual understanding
+- 🎤 Push-to-Talk recording mode
+- 📝 Transcript stabilization and synchronization
+- ⚡ Improved runtime performance and application stability
+- 🪟 Transparent always-on-top overlay
+- 📋 Multiple interview profiles
+- 💻 Cross-platform support (Windows, macOS, Linux)
+
+---
+
+## Tech Stack
+
+- Electron
+- JavaScript
+- Google Gemini Live API
+- Google Gemini Flash
+- Groq API
+
+---
 
 ## Setup
 
-1. **Get a Gemini API Key**: Visit [Google AI Studio](https://aistudio.google.com/apikey)
-2. **Install Dependencies**: `npm install`
-3. **Run the App**: `npm start`
+1. Clone the repository
+
+```bash
+git clone <your-repository-url>
+cd interview_assistant
+```
+
+2. Install dependencies
+
+```bash
+npm install
+```
+
+3. Configure your API keys
+
+- Google Gemini API Key
+- Groq API Key
+
+4. Start the application
+
+```bash
+npm start
+```
+
+---
 
 ## Usage
 
-1. Enter your Gemini API key in the main window
-2. Choose your profile and language in settings
-3. Click "Start Session" to begin
-4. Position the window using keyboard shortcuts
-5. The AI will provide real-time assistance based on your screen and what interview asks
+1. Launch the application.
+2. Enter your API keys.
+3. Start an interview session.
+4. Hold the **Space** key to record the interviewer's question.
+5. Release **Space** to process the transcript.
+6. Receive AI-generated answers in real time.
+
+---
+
+## Architecture
+
+```
+Interviewer Audio
+        │
+        ▼
+ Gemini Live
+(Speech-to-Text)
+        │
+        ▼
+Transcript Processing Pipeline
+        │
+        ▼
+Groq
+Primary Answer Generator
+        │
+        ▼
+Gemini Fallback
+(If Groq is unavailable)
+        │
+        ▼
+Interview Assistant Overlay
+```
+
+---
+
+## Enhancements
+
+Compared to the original open-source project, this version includes:
+
+- Redesigned transcript processing pipeline
+- Groq-powered answer generation
+- Automatic Gemini fallback mechanism
+- Improved Push-to-Talk workflow
+- Transcript stabilization
+- Better transcript synchronization
+- Runtime reliability improvements
+- Performance optimizations
+- Extensive debugging and logging enhancements
+
+---
 
 ## Keyboard Shortcuts
 
-- **Window Movement**: `Ctrl/Cmd + Arrow Keys` - Move window
-- **Click-through**: `Ctrl/Cmd + M` - Toggle mouse events
-- **Close/Back**: `Ctrl/Cmd + \` - Close window or go back
-- **Send Message**: `Enter` - Send text to AI
+| Shortcut | Action |
+|----------|--------|
+| **Ctrl/Cmd + Arrow Keys** | Move overlay window |
+| **Ctrl/Cmd + M** | Toggle click-through mode |
+| **Ctrl/Cmd + \\** | Close window / Go back |
+| **Enter** | Send message |
+| **Space (Hold)** | Record interviewer audio |
+| **Space (Release)** | Process transcript and generate answer |
 
-## Audio Capture
-
-- **macOS**: [SystemAudioDump](https://github.com/Mohammed-Yasin-Mulla/Sound) for system audio
-- **Windows**: Loopback audio capture
-- **Linux**: Microphone input
+---
 
 ## Requirements
 
-- Electron-compatible OS (macOS, Windows, Linux)
-- Gemini API key
-- Screen recording permissions
-- Microphone/audio permissions
+- Windows, macOS, or Linux
+- Node.js
+- Google Gemini API Key
+- Groq API Key
+- Screen recording permission
+- Microphone permission
+
+---
+
+## Acknowledgements
+
+This project is based on an open-source Electron interview assistant and has been extensively enhanced with significant architectural improvements, new AI integrations, transcript processing enhancements, and runtime optimizations.
