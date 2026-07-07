@@ -19,6 +19,10 @@ let currentProviderMode = 'byok';
 // Groq conversation history for context
 let groqConversationHistory = [];
 
+// Debug counters for generateAnswer invocations
+let activeGenerateAnswer = 0;
+let nextGenerateAnswerId = 1;
+
 // Conversation tracking variables
 let currentSessionId = null;
 let currentTranscription = '';
@@ -106,7 +110,7 @@ function sendToRenderer(channel, data) {
 
 // Build context message for session restoration
 function buildContextMessage() {
-    const lastTurns = conversationHistory.slice(-20);
+    const lastTurns = conversationHistory.slice(-14);
     const validTurns = lastTurns.filter(turn => turn.transcription?.trim() && turn.ai_response?.trim());
 
     if (validTurns.length === 0) return null;
@@ -254,21 +258,37 @@ async function generateAnswer(prompt) {
         console.log('Empty prompt, skipping answer generation');
         return;
     }
-    console.log('Using provider: Groq');
+
+    // --- INSTRUMENTATION START ---
+    const requestId = nextGenerateAnswerId++;
+    activeGenerateAnswer++;
+    const startTime = Date.now();
+    console.log(`[GA #${requestId}] START — active: ${activeGenerateAnswer}, prompt: "${prompt.substring(0, 60)}..."`);
+    // --- INSTRUMENTATION END ---
+
     try {
-        await sendToGroq(prompt);
-        return;
-    } catch (groqError) {
-        console.error('Groq failed:', groqError);
-        console.log('Falling back to Gemini');
+        console.log('Using provider: Groq');
         try {
-            await sendToGemma(prompt);
+            await sendToGroq(prompt);
             return;
-        } catch (gemError) {
-            console.error('Gemini also failed:', gemError);
-            // Re-throw so caller sees failure
-            throw gemError;
+        } catch (groqError) {
+            console.error('Groq failed:', groqError);
+            console.log('Falling back to Gemini');
+            try {
+                await sendToGemma(prompt);
+                return;
+            } catch (gemError) {
+                console.error('Gemini also failed:', gemError);
+                // Re-throw so caller sees failure
+                throw gemError;
+            }
         }
+    } finally {
+        // --- INSTRUMENTATION START ---
+        activeGenerateAnswer--;
+        const duration = Date.now() - startTime;
+        console.log(`[GA #${requestId}] END — active now: ${activeGenerateAnswer}, duration: ${duration}ms`);
+        // --- INSTRUMENTATION END ---
     }
 }
 
@@ -322,6 +342,69 @@ async function sendToGroq(transcription) {
         groqConversationHistory = groqConversationHistory.slice(-20);
     }
 
+    const systemContent = currentSystemPrompt || 'You are a helpful assistant.';
+    const messages = [
+        { role: 'system', content: systemContent },
+        ...groqConversationHistory
+    ];
+
+    // Debug logging as requested
+    let totalMessages = messages.length;
+    let userCount = 0;
+    let assistantCount = 0;
+    let systemCount = 0;
+    let systemChars = 0;
+    let historyChars = 0;
+    const messageLengths = [];
+
+    messages.forEach((msg, idx) => {
+        const content = msg.content || '';
+        const len = content.length;
+        messageLengths.push({ role: msg.role, index: idx, length: len });
+        if (msg.role === 'user') userCount++;
+        else if (msg.role === 'assistant') assistantCount++;
+        else if (msg.role === 'system') {
+            systemCount++;
+            systemChars = len;
+        }
+        if (msg.role !== 'system') {
+            historyChars += len;
+        }
+    });
+
+    const totalRequestChars = systemChars + historyChars;
+    const jsonLength = JSON.stringify(messages).length;
+
+    console.log('========== GROQ REQUEST ==========');
+    console.log('History messages:');
+    console.log(`User messages: ${userCount}`);
+    console.log(`Assistant messages: ${assistantCount}`);
+    console.log('');
+    console.log(`System prompt characters: ${systemChars}`);
+    console.log(`Conversation history characters: ${historyChars}`);
+    console.log(`Total request characters: ${totalRequestChars}`);
+    console.log('');
+    console.log('Message breakdown:');
+    let userIdx = 1;
+    let assistantIdx = 1;
+    let systemIdx = 1;
+    messages.forEach(msg => {
+        let label;
+        if (msg.role === 'system') {
+            label = `System`;
+        } else if (msg.role === 'user') {
+            label = `User ${userIdx++}`;
+        } else if (msg.role === 'assistant') {
+            label = `Assistant ${assistantIdx++}`;
+        } else {
+            label = msg.role;
+        }
+        const len = (msg.content || '').length;
+        console.log(`${label} : ${len} chars`);
+    });
+    console.log(`JSON.stringify(messages).length: ${jsonLength}`);
+    console.log('=================================');
+
     try {
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
@@ -331,10 +414,7 @@ async function sendToGroq(transcription) {
             },
             body: JSON.stringify({
                 model: modelToUse,
-                messages: [
-                    { role: 'system', content: currentSystemPrompt || 'You are a helpful assistant.' },
-                    ...groqConversationHistory
-                ],
+                messages: messages,
                 stream: true,
                 temperature: 0.7,
                 max_tokens: 1024
@@ -342,8 +422,23 @@ async function sendToGroq(transcription) {
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Groq API error:', response.status, errorText);
+            const responseBody = await response.text();
+
+            console.error('Groq API error:', response.status, responseBody);
+
+            console.log('========== GROQ HTTP ERROR ==========');
+            console.log('Status:', response.status);
+            console.log('Status Text:', response.statusText);
+
+            console.log('Headers:');
+            response.headers.forEach((value, key) => {
+                console.log(`${key}: ${value}`);
+            });
+
+            console.log('Body:');
+            console.log(responseBody);
+            console.log('=====================================');
+
             sendToRenderer('update-status', `Groq error: ${response.status}`);
             return;
         }

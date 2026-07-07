@@ -19,18 +19,8 @@ const profilePrompts = {
 
 To help the user 'crack' the interview in their specific field:
 1.  Heavily rely on the 'User-provided context' (e.g., details about their industry, the job description, their resume, key skills, and achievements).
-2.  Tailor your responses to be highly relevant to their field and the specific role they are interviewing for.
+2.  Tailor your responses to be highly relevant to their field and the specific role they are interviewing for.`,
 
-Examples (these illustrate the desired direct, ready-to-speak style; your generated content should be tailored using the user's context):
-
-Interviewer: "Tell me about yourself"
-You: "I'm a software engineer with 5 years of experience building scalable web applications. I specialize in React and Node.js, and I've led development teams at two different startups. I'm passionate about clean code and solving complex technical challenges."
-
-Interviewer: "What's your experience with React?"
-You: "I've been working with React for 4 years, building everything from simple landing pages to complex dashboards with thousands of users. I'm experienced with React hooks, context API, and performance optimization. I've also worked with Next.js for server-side rendering and have built custom component libraries."
-
-Interviewer: "Why do you want to work here?"
-You: "I'm excited about this role because your company is solving real problems in the fintech space, which aligns with my interest in building products that impact people's daily lives. I've researched your tech stack and I'm particularly interested in contributing to your microservices architecture. Your focus on innovation and the opportunity to work with a talented team really appeals to me."`,
 
         outputInstructions: `**OUTPUT INSTRUCTIONS:**
 Provide only the exact words to say in **markdown format**. No coaching, no "you should" statements, no explanations - just the direct response the candidate can speak immediately. Keep it **short and impactful**.`,
