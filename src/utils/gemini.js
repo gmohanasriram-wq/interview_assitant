@@ -19,6 +19,9 @@ let currentProviderMode = 'byok';
 // Groq conversation history for context
 let groqConversationHistory = [];
 
+// Keep only the last 5 conversation pairs
+const MAX_HISTORY_MESSAGES = 10;
+
 // Debug counters for generateAnswer invocations
 let activeGenerateAnswer = 0;
 let nextGenerateAnswerId = 1;
@@ -338,8 +341,9 @@ async function sendToGroq(transcription) {
         content: transcription.trim()
     });
 
-    if (groqConversationHistory.length > 20) {
-        groqConversationHistory = groqConversationHistory.slice(-20);
+    if (groqConversationHistory.length > MAX_HISTORY_MESSAGES) {
+        groqConversationHistory =
+            groqConversationHistory.slice(-MAX_HISTORY_MESSAGES);
     }
 
     const systemContent = currentSystemPrompt || 'You are a helpful assistant.';
@@ -440,7 +444,7 @@ async function sendToGroq(transcription) {
             console.log('=====================================');
 
             sendToRenderer('update-status', `Groq error: ${response.status}`);
-            return;
+            throw new Error(`Groq HTTP ${response.status}: ${responseBody}`);
         }
 
         const reader = response.body.getReader();
@@ -573,8 +577,9 @@ async function sendToGemma(transcription) {
                 content: fullText.trim()
             });
 
-            if (groqConversationHistory.length > 40) {
-                groqConversationHistory = groqConversationHistory.slice(-40);
+            if (groqConversationHistory.length > MAX_HISTORY_MESSAGES) {
+                groqConversationHistory =
+                    groqConversationHistory.slice(-MAX_HISTORY_MESSAGES);
             }
 
             saveConversationTurn(transcription, fullText);

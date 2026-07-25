@@ -36,7 +36,7 @@ const DEFAULT_PREFERENCES = {
 const DEFAULT_KEYBINDS = null; // null means use system defaults
 
 const DEFAULT_LIMITS = {
-    data: [] // Array of { date: 'YYYY-MM-DD', flash: { count }, flashLite: { count }, groq: { 'qwen3-32b': { chars, limit }, 'gpt-oss-120b': { chars, limit }, 'gpt-oss-20b': { chars, limit } }, gemini: { 'gemma-4-26b-a4b-it': { chars } } }
+    data: [] // Array of { date: 'YYYY-MM-DD', flash: { count }, flashLite: { count }, groq: { 'llama-3.3-70b-versatile': { chars, limit }, 'qwen/qwen3.6-27b': { chars, limit }, 'openai/gpt-oss-120b': { chars, limit }, 'openai/gpt-oss-20b': { chars, limit } }, gemini: { 'gemma-4-26b-a4b-it': { chars } } }
 };
 
 // Get the config directory path based on OS
@@ -258,15 +258,24 @@ function getTodayLimits() {
 
     if (todayEntry) {
         // ensure new fields exist
-        if(!todayEntry.groq) {
+        if (!todayEntry.groq) {
             todayEntry.groq = {
-                'qwen3-32b': { chars: 0, limit: 1500000 },
+                'llama-3.3-70b-versatile': { chars: 0, limit: 1500000 },
                 'gpt-oss-120b': { chars: 0, limit: 600000 },
                 'gpt-oss-20b': { chars: 0, limit: 600000 },
                 'kimi-k2-instruct': { chars: 0, limit: 600000 }
             };
+        } else {
+            // Migrate existing groq object to ensure all required models exist
+            if (!todayEntry.groq['llama-3.3-70b-versatile']) {
+                todayEntry.groq['llama-3.3-70b-versatile'] = { chars: 0, limit: 1500000 };
+            }
+            // Remove old model if it exists (optional cleanup)
+            if (todayEntry.groq['qwen3-32b']) {
+                delete todayEntry.groq['qwen3-32b'];
+            }
         }
-        if(!todayEntry.gemini) {
+        if (!todayEntry.gemini) {
             todayEntry.gemini = {
                 'gemma-4-26b-a4b-it': { chars: 0 }
             };
@@ -282,7 +291,7 @@ function getTodayLimits() {
         flash: { count: 0 },
         flashLite: { count: 0 },
         groq: {
-            'qwen3-32b': { chars: 0, limit: 1500000 },
+            'llama-3.3-70b-versatile': { chars: 0, limit: 1500000 },
             'gpt-oss-120b': { chars: 0, limit: 600000 },
             'gpt-oss-20b': { chars: 0, limit: 600000 },
             'kimi-k2-instruct': { chars: 0, limit: 600000 }
@@ -336,7 +345,7 @@ function incrementCharUsage(provider, model, charCount) {
     const today = getTodayDateString();
     const todayEntry = limits.data.find(entry => entry.date === today);
 
-    if(todayEntry[provider] && todayEntry[provider][model]) {
+    if (todayEntry[provider] && todayEntry[provider][model]) {
         todayEntry[provider][model].chars += charCount;
         setLimits(limits);
     }
@@ -362,8 +371,8 @@ function getModelForToday() {
     const todayEntry = getTodayLimits();
     const groq = todayEntry.groq;
 
-    if (groq['qwen3-32b'].chars < groq['qwen3-32b'].limit) {
-        return 'qwen/qwen3-32b';
+    if (groq['llama-3.3-70b-versatile'].chars < groq['llama-3.3-70b-versatile'].limit) {
+        return 'llama-3.3-70b-versatile';
     }
     if (groq['gpt-oss-120b'].chars < groq['gpt-oss-120b'].limit) {
         return 'openai/gpt-oss-120b';
