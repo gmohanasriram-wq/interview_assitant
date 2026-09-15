@@ -548,7 +548,7 @@ async function sendToGemma(transcription) {
         ];
 
         const response = await ai.models.generateContentStream({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3.5-flash',
             contents: messagesWithSystem,
         });
 
@@ -1179,9 +1179,10 @@ function setupGeminiIpcHandlers(geminiSessionRef) {
         try {
             console.log('Sending text message:', text);
 
-            generateAnswer(text.trim());
-
-            await geminiSessionRef.current.sendRealtimeInput({ text: text.trim() });
+            await Promise.all([
+                generateAnswer(text.trim()),
+                geminiSessionRef.current.sendRealtimeInput({ text: text.trim() }),
+            ]);
             return { success: true };
         } catch (error) {
             console.error('Error sending text:', error);
