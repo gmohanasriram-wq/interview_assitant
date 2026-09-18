@@ -36,7 +36,7 @@ const DEFAULT_PREFERENCES = {
 const DEFAULT_KEYBINDS = null; // null means use system defaults
 
 const DEFAULT_LIMITS = {
-    data: [] // Array of { date: 'YYYY-MM-DD', flash: { count }, flashLite: { count }, groq: { 'llama-3.3-70b-versatile': { chars, limit }, 'qwen/qwen3.6-27b': { chars, limit }, 'openai/gpt-oss-120b': { chars, limit }, 'openai/gpt-oss-20b': { chars, limit } }, gemini: { 'gemma-4-26b-a4b-it': { chars } } }
+    data: [] // Array of { date: 'YYYY-MM-DD', flash: { count }, flashLite: { count }, groq: { 'gpt-oss-120b': { chars, limit }, 'gpt-oss-20b': { chars, limit } }, gemini: { 'gemma-4-26b-a4b-it': { chars } } }
 };
 
 // Get the config directory path based on OS
@@ -260,14 +260,32 @@ function getTodayLimits() {
         // ensure new fields exist
         if (!todayEntry.groq) {
             todayEntry.groq = {
-                'openai/gpt-oss-120b': { chars: 0, limit: 1500000 },
-                'gpt-oss-120b': { chars: 0, limit: 600000 },
+                'gpt-oss-120b': { chars: 0, limit: 1500000 },
                 'gpt-oss-20b': { chars: 0, limit: 600000 }
             };
         } else {
-            // Migrate existing groq object to ensure all required models exist
-            if (!todayEntry.groq['openai/gpt-oss-120b']) {
-                todayEntry.groq['openai/gpt-oss-120b'] = { chars: 0, limit: 1500000 };
+            // Migrate existing groq object to ensure all required models exist.
+            // The primary bucket is unprefixed ('gpt-oss-120b') because gemini.js records
+            // usage as modelToUse.split('/').pop(). Fold any legacy 'openai/gpt-oss-120b'
+            // usage into it so already-recorded usage is preserved rather than reset.
+            const legacyPrimary = todayEntry.groq['openai/gpt-oss-120b'];
+            const primaryBucket = todayEntry.groq['gpt-oss-120b'];
+            if (legacyPrimary) {
+                const legacyChars = Number(legacyPrimary.chars) || 0;
+                if (primaryBucket) {
+                    primaryBucket.chars = (Number(primaryBucket.chars) || 0) + legacyChars;
+                    primaryBucket.limit = 1500000;
+                } else {
+                    todayEntry.groq['gpt-oss-120b'] = { chars: legacyChars, limit: 1500000 };
+                }
+                delete todayEntry.groq['openai/gpt-oss-120b'];
+            } else if (primaryBucket) {
+                primaryBucket.limit = 1500000;
+            } else {
+                todayEntry.groq['gpt-oss-120b'] = { chars: 0, limit: 1500000 };
+            }
+            if (!todayEntry.groq['gpt-oss-20b']) {
+                todayEntry.groq['gpt-oss-20b'] = { chars: 0, limit: 600000 };
             }
             // Remove old model if it exists (optional cleanup)
             if (todayEntry.groq['qwen3-32b']) {
@@ -293,8 +311,7 @@ function getTodayLimits() {
         flash: { count: 0 },
         flashLite: { count: 0 },
         groq: {
-            'openai/gpt-oss-120b': { chars: 0, limit: 1500000 },
-            'gpt-oss-120b': { chars: 0, limit: 600000 },
+            'gpt-oss-120b': { chars: 0, limit: 1500000 },
             'gpt-oss-20b': { chars: 0, limit: 600000 }
         },
         gemini: {
@@ -372,9 +389,6 @@ function getModelForToday() {
     const todayEntry = getTodayLimits();
     const groq = todayEntry.groq;
 
-    if (groq['openai/gpt-oss-120b'].chars < groq['openai/gpt-oss-120b'].limit) {
-        return 'openai/gpt-oss-120b';
-    }
     if (groq['gpt-oss-120b'].chars < groq['gpt-oss-120b'].limit) {
         return 'openai/gpt-oss-120b';
     }
