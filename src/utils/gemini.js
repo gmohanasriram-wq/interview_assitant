@@ -599,6 +599,12 @@ async function sendToGemma(transcription) {
         const response = await ai.models.generateContentStream({
             model: 'gemini-3.5-flash',
             contents: messagesWithSystem,
+            // Fallback answers are conversational and latency-critical; the model's
+            // default hidden reasoning added ~2.4s of TTFT here. 0 disables thinking
+            // (SDK: "0 is DISABLED"), verified accepted by gemini-3.5-flash.
+            config: {
+                thinkingConfig: { thinkingBudget: 0 },
+            },
         });
 
         let fullText = '';
