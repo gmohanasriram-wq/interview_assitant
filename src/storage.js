@@ -262,8 +262,7 @@ function getTodayLimits() {
             todayEntry.groq = {
                 'openai/gpt-oss-120b': { chars: 0, limit: 1500000 },
                 'gpt-oss-120b': { chars: 0, limit: 600000 },
-                'gpt-oss-20b': { chars: 0, limit: 600000 },
-                'kimi-k2-instruct': { chars: 0, limit: 600000 }
+                'gpt-oss-20b': { chars: 0, limit: 600000 }
             };
         } else {
             // Migrate existing groq object to ensure all required models exist
@@ -273,6 +272,9 @@ function getTodayLimits() {
             // Remove old model if it exists (optional cleanup)
             if (todayEntry.groq['qwen3-32b']) {
                 delete todayEntry.groq['qwen3-32b'];
+            }
+            if (todayEntry.groq['kimi-k2-instruct']) {
+                delete todayEntry.groq['kimi-k2-instruct'];
             }
         }
         if (!todayEntry.gemini) {
@@ -293,8 +295,7 @@ function getTodayLimits() {
         groq: {
             'openai/gpt-oss-120b': { chars: 0, limit: 1500000 },
             'gpt-oss-120b': { chars: 0, limit: 600000 },
-            'gpt-oss-20b': { chars: 0, limit: 600000 },
-            'kimi-k2-instruct': { chars: 0, limit: 600000 }
+            'gpt-oss-20b': { chars: 0, limit: 600000 }
         },
         gemini: {
             'gemma-4-26b-a4b-it': { chars: 0 }
@@ -379,9 +380,6 @@ function getModelForToday() {
     }
     if (groq['gpt-oss-20b'].chars < groq['gpt-oss-20b'].limit) {
         return 'openai/gpt-oss-20b';
-    }
-    if (groq['kimi-k2-instruct'].chars < groq['kimi-k2-instruct'].limit) {
-        return 'moonshotai/kimi-k2-instruct';
     }
 
     // All limits exhausted

@@ -5,6 +5,7 @@ const { saveDebugAudio } = require('../audioUtils');
 const { getSystemPrompt } = require('./prompts');
 const { getAvailableModel, incrementLimitCount, getApiKey, getGroqApiKey, incrementCharUsage, getModelForToday } = require('../storage');
 const { connectCloud, sendCloudAudio, sendCloudText, sendCloudImage, closeCloud, isCloudActive, setOnTurnComplete } = require('./cloud');
+const { getTelemetry } = require('./telemetry');
 
 // Lazy-loaded to avoid circular dependency (localai.js imports from gemini.js)
 let _localai = null;
@@ -83,6 +84,7 @@ async function processPendingTranscript() {
 
     console.log('Final transcript:', cleaned);
     pendingTranscript = '';
+    getTelemetry().onTranscript(cleaned, 'pendingTranscript');
     try {
         await generateAnswer(cleaned);
         return { success: true };
@@ -256,32 +258,34 @@ function hasGroqKey() {
     return key && key.trim() != ''
 }
 
-async function generateAnswer(prompt) {
-    if (!prompt || prompt.trim() === '') {
-        console.log('Empty prompt, skipping answer generation');
-        return;
-    }
+// Queue promise to sequence concurrent generation requests
+let generateAnswerQueue = Promise.resolve();
 
+async function executeGenerateAnswer(prompt) {
     // --- INSTRUMENTATION START ---
     const requestId = nextGenerateAnswerId++;
     activeGenerateAnswer++;
     const startTime = Date.now();
     console.log(`[GA #${requestId}] START — active: ${activeGenerateAnswer}, prompt: "${prompt.substring(0, 60)}..."`);
+    const genContext = getTelemetry().onGenerateAnswerStart(prompt, 'generateAnswer');
     // --- INSTRUMENTATION END ---
 
     try {
         console.log('Using provider: Groq');
         try {
             await sendToGroq(prompt);
+            getTelemetry().onGenerateAnswerEnd(genContext, true);
             return;
         } catch (groqError) {
             console.error('Groq failed:', groqError);
             console.log('Falling back to Gemini');
             try {
                 await sendToGemma(prompt);
+                getTelemetry().onGenerateAnswerEnd(genContext, true);
                 return;
             } catch (gemError) {
                 console.error('Gemini also failed:', gemError);
+                getTelemetry().onGenerateAnswerEnd(genContext, false, gemError);
                 // Re-throw so caller sees failure
                 throw gemError;
             }
@@ -292,6 +296,36 @@ async function generateAnswer(prompt) {
         const duration = Date.now() - startTime;
         console.log(`[GA #${requestId}] END — active now: ${activeGenerateAnswer}, duration: ${duration}ms`);
         // --- INSTRUMENTATION END ---
+    }
+}
+
+async function generateAnswer(prompt) {
+    if (!prompt || prompt.trim() === '') {
+        console.log('Empty prompt, skipping answer generation');
+        return;
+    }
+
+    // Sequence generations to prevent history interleaving and UI stream collisions
+    const previousQueue = generateAnswerQueue;
+    let taskResolve, taskReject;
+    const taskPromise = new Promise((resolve, reject) => {
+        taskResolve = resolve;
+        taskReject = reject;
+    });
+
+    // Update queue chain immediately so subsequent callers wait for this task
+    generateAnswerQueue = taskPromise.catch(() => { });
+
+    // Wait for the prior task in queue to finish (regardless of whether it succeeded or failed)
+    await previousQueue.catch(() => { });
+
+    try {
+        const result = await executeGenerateAnswer(prompt);
+        taskResolve(result);
+        return result;
+    } catch (err) {
+        taskReject(err);
+        throw err;
     }
 }
 
@@ -409,6 +443,9 @@ async function sendToGroq(transcription) {
     console.log(`JSON.stringify(messages).length: ${jsonLength}`);
     console.log('=================================');
 
+    const groqReqId = 'groq_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+    getTelemetry().onGroqStart(groqReqId, modelToUse, transcription, messages);
+
     try {
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
@@ -422,7 +459,8 @@ async function sendToGroq(transcription) {
                 stream: true,
                 temperature: 0.7,
                 max_tokens: 1024
-            })
+            }),
+            signal: AbortSignal.timeout(10000)
         });
 
         if (!response.ok) {
@@ -466,6 +504,7 @@ async function sendToGroq(transcription) {
 
                     try {
                         const json = JSON.parse(data);
+                        getTelemetry().onGroqChunk(groqReqId, json);
                         const token = json.choices?.[0]?.delta?.content || '';
                         if (token) {
                             fullText += token;
@@ -502,9 +541,11 @@ async function sendToGroq(transcription) {
         }
 
         console.log(`Groq response completed (${modelToUse})`);
+        getTelemetry().onGroqEnd(groqReqId, true, null, cleanedResponse.length);
         sendToRenderer('update-status', 'Listening...');
 
     } catch (error) {
+        getTelemetry().onGroqEnd(groqReqId, false, error, 0);
         console.error('Error calling Groq API:', error);
         sendToRenderer('update-status', 'Groq error: ' + error.message);
         throw error;
@@ -525,13 +566,18 @@ async function sendToGemma(transcription) {
 
     console.log('Sending to Gemma:', transcription.substring(0, 100) + '...');
 
-    groqConversationHistory.push({
-        role: 'user',
-        content: transcription.trim()
-    });
+    const trimmedUserContent = transcription.trim();
+    const lastMsg = groqConversationHistory[groqConversationHistory.length - 1];
+    if (!lastMsg || lastMsg.role !== 'user' || lastMsg.content !== trimmedUserContent) {
+        groqConversationHistory.push({
+            role: 'user',
+            content: trimmedUserContent
+        });
+    }
 
     const trimmedHistory = trimConversationHistoryForGemma(groqConversationHistory, 42000);
 
+    let geminiReqId;
     try {
         const ai = new GoogleGenAI({ apiKey: apiKey });
 
@@ -547,6 +593,9 @@ async function sendToGemma(transcription) {
             ...messages
         ];
 
+        geminiReqId = 'gemini_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+        getTelemetry().onGeminiFallbackStart(geminiReqId, 'gemini-3.5-flash', transcription, messagesWithSystem);
+
         const response = await ai.models.generateContentStream({
             model: 'gemini-3.5-flash',
             contents: messagesWithSystem,
@@ -556,6 +605,7 @@ async function sendToGemma(transcription) {
         let isFirst = true;
 
         for await (const chunk of response) {
+            getTelemetry().onGeminiChunk(geminiReqId, chunk);
             const chunkText = chunk.text;
             if (chunkText) {
                 fullText += chunkText;
@@ -586,9 +636,13 @@ async function sendToGemma(transcription) {
         }
 
         console.log('Gemma response completed');
+        getTelemetry().onGeminiEnd(geminiReqId, true, null, fullText.length);
         sendToRenderer('update-status', 'Listening...');
 
     } catch (error) {
+        if (geminiReqId) {
+            getTelemetry().onGeminiEnd(geminiReqId, false, error, 0);
+        }
         console.error('Error calling Gemma API:', error);
         sendToRenderer('update-status', 'Gemma error: ' + error.message);
         throw error;
@@ -643,13 +697,26 @@ async function initializeGeminiSession(apiKey, customPrompt = '', profile = 'int
                 onmessage: async function (message) {
                     console.log('----------------', message);
 
+                    // Track audio output received from Gemini Live
+                    if (message.serverContent?.modelTurn?.parts) {
+                        for (const part of message.serverContent.modelTurn.parts) {
+                            if (part.inlineData?.data) {
+                                const audioBytes = Buffer.from(part.inlineData.data, 'base64').length;
+                                getTelemetry().onLiveAudioOutput(audioBytes);
+                            }
+                        }
+                    }
+
                     // Handle input transcription (what was spoken)
                     if (message.serverContent?.inputTranscription?.results) {
-                        currentTranscription += formatSpeakerResults(message.serverContent.inputTranscription.results);
+                        const formatted = formatSpeakerResults(message.serverContent.inputTranscription.results);
+                        currentTranscription += formatted;
+                        getTelemetry().onTranscript(formatted, 'live-speaker-results');
                     } else if (message.serverContent?.inputTranscription?.text) {
                         const text = message.serverContent.inputTranscription.text;
                         if (text.trim() !== '') {
                             currentTranscription += text;
+                            getTelemetry().onTranscript(text, 'live-input-transcript');
                         }
                     }
 
@@ -704,7 +771,7 @@ async function initializeGeminiSession(apiKey, customPrompt = '', profile = 'int
                 contextWindowCompression: { slidingWindow: {} },
                 speechConfig: { languageCode: language },
                 systemInstruction: {
-                    parts: [{ text: systemPrompt }],
+                    parts: [{ text: 'CRITICAL INSTRUCTION: You are an audio transcription listener only. DO NOT speak, do not reply, do not answer questions, and do not produce any audible or verbal output. Never generate audio response. Always remain completely silent.\n\n' + systemPrompt }],
                 },
             },
         });
@@ -932,6 +999,10 @@ async function sendAudioToGemini(base64Data, geminiSessionRef) {
 
     try {
         process.stdout.write('.');
+        if (base64Data) {
+            const buf = Buffer.from(base64Data, 'base64');
+            getTelemetry().onLiveAudioInput(buf.length);
+        }
         await geminiSessionRef.current.sendRealtimeInput({
             audio: {
                 data: base64Data,
@@ -943,59 +1014,84 @@ async function sendAudioToGemini(base64Data, geminiSessionRef) {
     }
 }
 
-async function sendImageToGeminiHttp(base64Data, prompt) {
-    // Get available model based on rate limits
-    const model = getAvailableModel();
+let isImageAnalysisInProgress = false;
 
-    const apiKey = getApiKey();
-    if (!apiKey) {
-        return { success: false, error: 'No API key configured' };
+async function sendImageToGeminiHttp(base64Data, prompt) {
+    if (isImageAnalysisInProgress) {
+        console.log('Image analysis already in progress, skipping duplicate request');
+        return { success: false, error: 'Image analysis already in progress' };
     }
+    isImageAnalysisInProgress = true;
 
     try {
-        const ai = new GoogleGenAI({ apiKey: apiKey });
+        // Get available model based on rate limits
+        const model = getAvailableModel();
 
-        const contents = [
-            {
-                inlineData: {
-                    mimeType: 'image/jpeg',
-                    data: base64Data,
-                },
-            },
-            { text: prompt },
-        ];
-
-        console.log(`Sending image to ${model} (streaming)...`);
-        const response = await ai.models.generateContentStream({
-            model: model,
-            contents: contents,
-        });
-
-        // Increment count after successful call
-        incrementLimitCount(model);
-
-        // Stream the response
-        let fullText = '';
-        let isFirst = true;
-        for await (const chunk of response) {
-            const chunkText = chunk.text;
-            if (chunkText) {
-                fullText += chunkText;
-                // Send to renderer - new response for first chunk, update for subsequent
-                sendToRenderer(isFirst ? 'new-response' : 'update-response', fullText);
-                isFirst = false;
-            }
+        const apiKey = getApiKey();
+        if (!apiKey) {
+            return { success: false, error: 'No API key configured' };
         }
 
-        console.log(`Image response completed from ${model}`);
+        const effectivePrompt = (prompt && typeof prompt === 'string' && prompt.trim())
+            ? prompt.trim()
+            : 'Briefly describe the key content and questions visible in this screenshot.';
 
-        // Save screen analysis to history
-        saveScreenAnalysis(prompt, fullText, model);
+        let imgReqId;
+        try {
+            const ai = new GoogleGenAI({ apiKey: apiKey });
 
-        return { success: true, text: fullText, model: model };
-    } catch (error) {
-        console.error('Error sending image to Gemini HTTP:', error);
-        return { success: false, error: error.message };
+            const contents = [
+                {
+                    inlineData: {
+                        mimeType: 'image/jpeg',
+                        data: base64Data,
+                    },
+                },
+                { text: effectivePrompt },
+            ];
+
+            imgReqId = 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+            getTelemetry().onImageRequestStart(imgReqId, model, effectivePrompt, base64Data);
+
+            console.log(`Sending image to ${model} (streaming)...`);
+            const response = await ai.models.generateContentStream({
+                model: model,
+                contents: contents,
+            });
+
+            // Increment count after successful call
+            incrementLimitCount(model);
+
+            // Stream the response
+            let fullText = '';
+            let isFirst = true;
+            for await (const chunk of response) {
+                getTelemetry().onGeminiChunk(imgReqId, chunk);
+                const chunkText = chunk.text;
+                if (chunkText) {
+                    fullText += chunkText;
+                    // Send to renderer - new response for first chunk, update for subsequent
+                    sendToRenderer(isFirst ? 'new-response' : 'update-response', fullText);
+                    isFirst = false;
+                }
+            }
+
+            console.log(`Image response completed from ${model}`);
+            getTelemetry().onGeminiEnd(imgReqId, true, null, fullText.length);
+
+            // Save screen analysis to history
+            saveScreenAnalysis(effectivePrompt, fullText, model);
+
+            return { success: true, text: fullText, model: model };
+        } catch (error) {
+            if (imgReqId) {
+                getTelemetry().onGeminiEnd(imgReqId, false, error, 0);
+            }
+            console.error('Error sending image to Gemini HTTP:', error);
+            return { success: false, error: error.message };
+        }
+    } finally {
+        isImageAnalysisInProgress = false;
     }
 }
 
@@ -1065,6 +1161,10 @@ function setupGeminiIpcHandlers(geminiSessionRef) {
         if (!geminiSessionRef.current) return { success: false, error: 'No active Gemini session' };
         try {
             process.stdout.write('.');
+            if (data) {
+                const buf = Buffer.from(data, 'base64');
+                getTelemetry().onLiveAudioInput(buf.length);
+            }
             await geminiSessionRef.current.sendRealtimeInput({
                 audio: { data: data, mimeType: mimeType },
             });
@@ -1100,6 +1200,10 @@ function setupGeminiIpcHandlers(geminiSessionRef) {
         if (!geminiSessionRef.current) return { success: false, error: 'No active Gemini session' };
         try {
             process.stdout.write(',');
+            if (data) {
+                const buf = Buffer.from(data, 'base64');
+                getTelemetry().onLiveAudioInput(buf.length);
+            }
             await geminiSessionRef.current.sendRealtimeInput({
                 audio: { data: data, mimeType: mimeType },
             });
@@ -1174,15 +1278,11 @@ function setupGeminiIpcHandlers(geminiSessionRef) {
             }
         }
 
-        if (!geminiSessionRef.current) return { success: false, error: 'No active Gemini session' };
-
         try {
             console.log('Sending text message:', text);
+            getTelemetry().onTextMessage(text);
 
-            await Promise.all([
-                generateAnswer(text.trim()),
-                geminiSessionRef.current.sendRealtimeInput({ text: text.trim() }),
-            ]);
+            await generateAnswer(text.trim());
             return { success: true };
         } catch (error) {
             console.error('Error sending text:', error);
@@ -1320,4 +1420,6 @@ module.exports = {
     sendImageToGeminiHttp,
     setupGeminiIpcHandlers,
     formatSpeakerResults,
+    generateAnswer,
+    sendToGemma,
 };

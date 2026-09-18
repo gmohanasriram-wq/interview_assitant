@@ -1,0 +1,44 @@
+{
+  "timestamp": "2026-09-18T15:56:35.947Z",
+  "timeoutDurationMs": 10015,
+  "fallbackLatencyMs": 3045,
+  "totalElapsedMs": 13060,
+  "tests": {
+    "stalled_request_timeout": {
+      "classification": "AUTOMATED",
+      "success": true,
+      "error": null,
+      "abortSignalFired": true,
+      "timeoutDurationMs": 10015,
+      "fallbackLatencyMs": 3045,
+      "totalDurationMs": 13060,
+      "groqFailedRecorded": true,
+      "geminiSuccessRecorded": true,
+      "geminiModel": "gemini-3.5-flash",
+      "uiUpdatesCount": 2,
+      "finalUiAnswer": "A race condition occurs when multiple threads access shared data concurrently, making the final outcome dependent on the unpredictable timing of their execution.",
+      "historyLength": 1,
+      "userMessageRecordedOnce": true
+    },
+    "fifo_queue_release": {
+      "classification": "AUTOMATED",
+      "success": true,
+      "error": null,
+      "durationMs": 646,
+      "queueUnblocked": true,
+      "totalSessionHistoryLength": 2
+    },
+    "regression_404": {
+      "classification": "AUTOMATED",
+      "pass": true
+    },
+    "regression_429": {
+      "classification": "AUTOMATED",
+      "pass": true
+    },
+    "regression_network": {
+      "classification": "AUTOMATED",
+      "pass": true
+    }
+  }
+}

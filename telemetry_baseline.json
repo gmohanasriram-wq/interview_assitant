@@ -1,0 +1,120 @@
+{
+  "timestamp": "2026-09-18T16:03:00.337Z",
+  "elapsedMs": 3512,
+  "counts": {
+    "transcripts": 0,
+    "generateAnswer": 1,
+    "groqRequests": 1,
+    "geminiHttpRequests": 1,
+    "geminiLiveAudioTurns": 0,
+    "screenshotRequests": 0,
+    "fallbackRequests": 1,
+    "typedMessages": 0,
+    "totalAiRequests": 2
+  },
+  "concurrency": {
+    "maxConcurrentGenerations": 1,
+    "overlappingGenerationsCount": 0,
+    "overlapPercentage": 0
+  },
+  "audio": {
+    "inputChunks": 0,
+    "inputBytes": 0,
+    "firstInputTime": null,
+    "lastInputTime": null,
+    "outputAudioChunks": 0,
+    "outputAudioBytes": 0,
+    "outputAudioConsumed": false,
+    "outputHandling": "discarded",
+    "audioDurationSec": 0,
+    "inputBytesPerSec": 0
+  },
+  "requests": [
+    {
+      "id": "groq_1789747376829_mi5o",
+      "type": "groq",
+      "model": "openai/gpt-oss-120b",
+      "fingerprint": "393a7a070943b7f6",
+      "promptChars": 46,
+      "systemChars": 28,
+      "historyChars": 46,
+      "messagesCount": 2,
+      "userMessagesCount": 1,
+      "assistantMessagesCount": 0,
+      "systemMessagesCount": 1,
+      "startTime": 1789747376830,
+      "firstTokenTime": null,
+      "ttft": null,
+      "endTime": 1789747376832,
+      "duration": 2,
+      "success": false,
+      "error": "Groq HTTP 500: {\"error\":{\"message\":\"Simulated 500\"}}",
+      "isFallback": false,
+      "actualUsage": null,
+      "actualTokensAvailable": false,
+      "estimatedTokens": {
+        "input": 30,
+        "output": 1,
+        "total": 31
+      },
+      "outputChars": 0
+    },
+    {
+      "id": "gemini_1789747376837_hxxc",
+      "type": "gemini_fallback",
+      "model": "gemini-3.5-flash",
+      "fingerprint": "393a7a070943b7f6",
+      "promptChars": 46,
+      "historyChars": 119,
+      "messagesCount": 3,
+      "userMessagesCount": 2,
+      "assistantMessagesCount": 1,
+      "startTime": 1789747376838,
+      "firstTokenTime": 1789747380097,
+      "ttft": 3259,
+      "endTime": 1789747380336,
+      "duration": 3498,
+      "success": true,
+      "error": null,
+      "isFallback": true,
+      "actualUsage": {
+        "prompt_tokens": 26,
+        "completion_tokens": 55,
+        "total_tokens": 439,
+        "thoughts_tokens": 358
+      },
+      "actualTokensAvailable": true,
+      "estimatedTokens": {
+        "input": 41,
+        "output": 71,
+        "total": 112
+      },
+      "outputChars": 285
+    }
+  ],
+  "transcriptsSeen": {},
+  "historySnapshots": [
+    {
+      "timestamp": 1789747376830,
+      "type": "groq_pre_request",
+      "messagesCount": 2,
+      "userCount": 1,
+      "assistantCount": 0,
+      "systemCount": 1,
+      "totalChars": 74
+    },
+    {
+      "timestamp": 1789747376838,
+      "type": "gemini_fallback_pre_request",
+      "messagesCount": 3,
+      "userCount": 2,
+      "assistantCount": 1,
+      "totalChars": 119
+    }
+  ],
+  "overhead": {
+    "totalCalls": 12,
+    "totalOverheadMs": 8.068,
+    "errors": []
+  }
+}

@@ -443,28 +443,26 @@ export class CheatingDaddyApp extends LitElement {
     connectedCallback() {
         super.connectedCallback();
 
-        if (window.require) {
-            const { ipcRenderer } = window.require('electron');
-            ipcRenderer.on('new-response', (_, response) => this.addNewResponse(response));
-            ipcRenderer.on('update-response', (_, response) => this.updateCurrentResponse(response));
-            ipcRenderer.on('update-status', (_, status) => this.setStatus(status));
-            ipcRenderer.on('click-through-toggled', (_, isEnabled) => { this._isClickThrough = isEnabled; });
-            ipcRenderer.on('reconnect-failed', (_, data) => this.addNewResponse(data.message));
-            ipcRenderer.on('whisper-downloading', (_, downloading) => { this._whisperDownloading = downloading; });
+        if (window.electronAPI) {
+            window.electronAPI.on('new-response', response => this.addNewResponse(response));
+            window.electronAPI.on('update-response', response => this.updateCurrentResponse(response));
+            window.electronAPI.on('update-status', status => this.setStatus(status));
+            window.electronAPI.on('click-through-toggled', isEnabled => { this._isClickThrough = isEnabled; });
+            window.electronAPI.on('reconnect-failed', data => this.addNewResponse(data.message));
+            window.electronAPI.on('whisper-downloading', downloading => { this._whisperDownloading = downloading; });
         }
     }
 
     disconnectedCallback() {
         super.disconnectedCallback();
         this._stopTimer();
-        if (window.require) {
-            const { ipcRenderer } = window.require('electron');
-            ipcRenderer.removeAllListeners('new-response');
-            ipcRenderer.removeAllListeners('update-response');
-            ipcRenderer.removeAllListeners('update-status');
-            ipcRenderer.removeAllListeners('click-through-toggled');
-            ipcRenderer.removeAllListeners('reconnect-failed');
-            ipcRenderer.removeAllListeners('whisper-downloading');
+        if (window.electronAPI) {
+            window.electronAPI.removeAllListeners('new-response');
+            window.electronAPI.removeAllListeners('update-response');
+            window.electronAPI.removeAllListeners('update-status');
+            window.electronAPI.removeAllListeners('click-through-toggled');
+            window.electronAPI.removeAllListeners('reconnect-failed');
+            window.electronAPI.removeAllListeners('whisper-downloading');
         }
     }
 
@@ -533,32 +531,28 @@ export class CheatingDaddyApp extends LitElement {
     async handleClose() {
         if (this.currentView === 'assistant') {
             cheatingDaddy.stopCapture();
-            if (window.require) {
-                const { ipcRenderer } = window.require('electron');
-                await ipcRenderer.invoke('close-session');
+            if (window.electronAPI) {
+                await window.electronAPI.closeSession();
             }
             this.sessionActive = false;
             this._stopTimer();
             this.currentView = 'main';
         } else {
-            if (window.require) {
-                const { ipcRenderer } = window.require('electron');
-                await ipcRenderer.invoke('quit-application');
+            if (window.electronAPI) {
+                await window.electronAPI.quitApplication();
             }
         }
     }
 
     async _handleMinimize() {
-        if (window.require) {
-            const { ipcRenderer } = window.require('electron');
-            await ipcRenderer.invoke('window-minimize');
+        if (window.electronAPI) {
+            await window.electronAPI.windowMinimize();
         }
     }
 
     async handleHideToggle() {
-        if (window.require) {
-            const { ipcRenderer } = window.require('electron');
-            await ipcRenderer.invoke('toggle-window-visibility');
+        if (window.electronAPI) {
+            await window.electronAPI.toggleWindowVisibility();
         }
     }
 
@@ -618,16 +612,14 @@ export class CheatingDaddyApp extends LitElement {
     }
 
     async handleAPIKeyHelp() {
-        if (window.require) {
-            const { ipcRenderer } = window.require('electron');
-            await ipcRenderer.invoke('open-external', 'https://cheatingdaddy.com/help/api-key');
+        if (window.electronAPI) {
+            await window.electronAPI.openExternal('https://cheatingdaddy.com/help/api-key');
         }
     }
 
     async handleGroqAPIKeyHelp() {
-        if (window.require) {
-            const { ipcRenderer } = window.require('electron');
-            await ipcRenderer.invoke('open-external', 'https://console.groq.com/keys');
+        if (window.electronAPI) {
+            await window.electronAPI.openExternal('https://console.groq.com/keys');
         }
     }
 
@@ -660,9 +652,8 @@ export class CheatingDaddyApp extends LitElement {
     }
 
     async handleExternalLinkClick(url) {
-        if (window.require) {
-            const { ipcRenderer } = window.require('electron');
-            await ipcRenderer.invoke('open-external', url);
+        if (window.electronAPI) {
+            await window.electronAPI.openExternal(url);
         }
     }
 
@@ -689,9 +680,8 @@ export class CheatingDaddyApp extends LitElement {
     updated(changedProperties) {
         super.updated(changedProperties);
 
-        if (changedProperties.has('currentView') && window.require) {
-            const { ipcRenderer } = window.require('electron');
-            ipcRenderer.send('view-changed', this.currentView);
+        if (changedProperties.has('currentView') && window.electronAPI) {
+            window.electronAPI.viewChanged(this.currentView);
         }
     }
 

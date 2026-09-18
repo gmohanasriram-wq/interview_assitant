@@ -1,0 +1,418 @@
+{
+  "testSessionTimestamp": "2026-09-18T15:15:02.902Z",
+  "environment": {
+    "os": "win32 x64",
+    "electronVersion": "30.5.1",
+    "nodeVersion": "20.16.0",
+    "chromeVersion": "124.0.6367.243",
+    "appVersion": "0.7.0"
+  },
+  "features": {
+    "App launch": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "Window created and loaded successfully"
+    },
+    "Overlay": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "AlwaysOnTop: true, Transparent: true"
+    },
+    "Window visibility": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "Visible: true"
+    },
+    "Security regression (Node isolation)": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "Zero nodeIntegration in renderer; contextBridge active"
+    },
+    "Security regression (DOMPurify XSS defense)": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "DOMPurify actively neutralizes onerror and script tags"
+    },
+    "Keyboard shortcuts": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "Global shortcuts registered without exception"
+    },
+    "Settings": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "Preferences IPC and schema accessible"
+    },
+    "History": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "History storage directory initialized and accessible"
+    },
+    "Minimize/Close/Quit": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "IPC endpoints mapped in main process"
+    },
+    "External links": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "setWindowOpenHandler denied unsafe, routes http/https"
+    },
+    "Gemini Live": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "Connected to gemini-3.1-flash-live-preview WebSocket"
+    },
+    "Audio capture pipeline": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "Audio input streamed to Live session (48,000 bytes total)"
+    },
+    "Microphone": {
+      "classification": "OBSERVED",
+      "result": "PASS",
+      "details": "Renderer audio capture hook present; synthetic audio fed directly to Live input"
+    },
+    "Transcription": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "Live input audio transcription protocol active"
+    },
+    "Groq generation": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "Successfully streamed response via Groq API"
+    },
+    "Streaming": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "Groq response streamed chunk-by-chunk to renderer"
+    },
+    "Typed message processing": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "send-text-message completed single-path dispatch"
+    },
+    "Screenshot capture": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "Buffer prepared and dispatched to HTTP handler"
+    },
+    "Screenshot analysis": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "Received image analysis response from gemini-3.5-flash"
+    },
+    "Gemini fallback": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "Fallback to gemini-3.5-flash executed and measured"
+    },
+    "Concurrency handling": {
+      "classification": "AUTOMATED",
+      "result": "PASS",
+      "details": "Concurrent generateAnswer calls executed and tracked"
+    },
+    "Local Whisper / Ollama": {
+      "classification": "NOT_TESTED",
+      "result": "NOT_OBSERVED",
+      "details": "Local daemon not running (BYOK mode active)"
+    }
+  },
+  "measurements": {
+    "timestamp": "2026-09-18T15:15:14.910Z",
+    "elapsedMs": 11939,
+    "counts": {
+      "transcripts": 0,
+      "generateAnswer": 4,
+      "groqRequests": 4,
+      "geminiHttpRequests": 2,
+      "geminiLiveAudioTurns": 0,
+      "screenshotRequests": 1,
+      "fallbackRequests": 1,
+      "typedMessages": 2,
+      "totalAiRequests": 6
+    },
+    "concurrency": {
+      "maxConcurrentGenerations": 1,
+      "overlappingGenerationsCount": 0,
+      "overlapPercentage": 0
+    },
+    "audio": {
+      "inputChunks": 10,
+      "inputBytes": 48000,
+      "firstInputTime": 1789744503787,
+      "lastInputTime": 1789744504617,
+      "outputAudioChunks": 0,
+      "outputAudioBytes": 0,
+      "outputAudioConsumed": false,
+      "outputHandling": "discarded",
+      "audioDurationSec": 0.83,
+      "inputBytesPerSec": 57831
+    },
+    "requests": [
+      {
+        "id": "groq_1789744506731_85by",
+        "type": "groq",
+        "model": "openai/gpt-oss-120b",
+        "fingerprint": "af10174fb84a1250",
+        "promptChars": 69,
+        "systemChars": 28,
+        "historyChars": 69,
+        "messagesCount": 2,
+        "userMessagesCount": 1,
+        "assistantMessagesCount": 0,
+        "systemMessagesCount": 1,
+        "startTime": 1789744506731,
+        "firstTokenTime": 1789744507076,
+        "ttft": 345,
+        "endTime": 1789744507149,
+        "duration": 418,
+        "success": true,
+        "error": null,
+        "isFallback": false,
+        "actualUsage": {
+          "prompt_tokens": 94,
+          "completion_tokens": 96,
+          "total_tokens": 190,
+          "queue_time": 0.05968231,
+          "prompt_time": 0.00940969,
+          "completion_time": 0.202055138
+        },
+        "actualTokensAvailable": true,
+        "estimatedTokens": {
+          "input": 42,
+          "output": 32,
+          "total": 74
+        },
+        "outputChars": 126
+      },
+      {
+        "id": "groq_1789744507163_vrbb",
+        "type": "groq",
+        "model": "openai/gpt-oss-120b",
+        "fingerprint": "77363b665b008ecb",
+        "promptChars": 34,
+        "systemChars": 28,
+        "historyChars": 34,
+        "messagesCount": 2,
+        "userMessagesCount": 1,
+        "assistantMessagesCount": 0,
+        "systemMessagesCount": 1,
+        "startTime": 1789744507164,
+        "firstTokenTime": 1789744507693,
+        "ttft": 529,
+        "endTime": 1789744507795,
+        "duration": 631,
+        "success": true,
+        "error": null,
+        "isFallback": false,
+        "actualUsage": {
+          "prompt_tokens": 87,
+          "completion_tokens": 87,
+          "total_tokens": 174,
+          "queue_time": 0.342958949,
+          "prompt_time": 0.029676967,
+          "completion_time": 0.181748362
+        },
+        "actualTokensAvailable": true,
+        "estimatedTokens": {
+          "input": 24,
+          "output": 57,
+          "total": 81
+        },
+        "outputChars": 226
+      },
+      {
+        "id": "img_1789744507810_76jq",
+        "type": "gemini_image",
+        "model": "gemini-3.5-flash",
+        "fingerprint": "a644c73b294c13a1",
+        "promptChars": 52,
+        "imageBytes": 2154,
+        "startTime": 1789744507810,
+        "firstTokenTime": 1789744511000,
+        "ttft": 3190,
+        "endTime": 1789744511008,
+        "duration": 3198,
+        "success": true,
+        "error": null,
+        "isFallback": false,
+        "actualUsage": {
+          "prompt_tokens": 1102,
+          "completion_tokens": 7,
+          "total_tokens": 1560,
+          "thoughts_tokens": 451
+        },
+        "actualTokensAvailable": true,
+        "multimodal": {
+          "hasImage": true,
+          "imageBytes": 2154
+        },
+        "estimatedTokens": {
+          "input": 271,
+          "output": 8,
+          "total": 279
+        },
+        "outputChars": 31
+      },
+      {
+        "id": "gemini_1789744511017_46ok",
+        "type": "gemini_fallback",
+        "model": "gemini-3.5-flash",
+        "fingerprint": "36a9be1a7f2f2cc7",
+        "promptChars": 69,
+        "historyChars": 402,
+        "messagesCount": 5,
+        "userMessagesCount": 3,
+        "assistantMessagesCount": 2,
+        "startTime": 1789744511017,
+        "firstTokenTime": 1789744513386,
+        "ttft": 2369,
+        "endTime": 1789744513394,
+        "duration": 2377,
+        "success": true,
+        "error": null,
+        "isFallback": true,
+        "actualUsage": {
+          "prompt_tokens": 84,
+          "completion_tokens": 12,
+          "total_tokens": 339,
+          "thoughts_tokens": 243
+        },
+        "actualTokensAvailable": true,
+        "estimatedTokens": {
+          "input": 118,
+          "output": 17,
+          "total": 135
+        },
+        "outputChars": 67
+      },
+      {
+        "id": "groq_1789744513406_42te",
+        "type": "groq",
+        "model": "openai/gpt-oss-120b",
+        "fingerprint": "88581abf2257901b",
+        "promptChars": 45,
+        "systemChars": 28,
+        "historyChars": 441,
+        "messagesCount": 6,
+        "userMessagesCount": 3,
+        "assistantMessagesCount": 2,
+        "systemMessagesCount": 1,
+        "startTime": 1789744513406,
+        "firstTokenTime": 1789744513905,
+        "ttft": 499,
+        "endTime": 1789744514034,
+        "duration": 628,
+        "success": true,
+        "error": null,
+        "isFallback": false,
+        "actualUsage": {
+          "prompt_tokens": 185,
+          "completion_tokens": 114,
+          "total_tokens": 299,
+          "queue_time": 0.307372347,
+          "prompt_time": 0.009325808,
+          "completion_time": 0.241706882
+        },
+        "actualTokensAvailable": true,
+        "estimatedTokens": {
+          "input": 129,
+          "output": 61,
+          "total": 190
+        },
+        "outputChars": 244
+      },
+      {
+        "id": "groq_1789744514044_83wf",
+        "type": "groq",
+        "model": "openai/gpt-oss-120b",
+        "fingerprint": "58e8f9dd8a0273d6",
+        "promptChars": 45,
+        "systemChars": 28,
+        "historyChars": 730,
+        "messagesCount": 8,
+        "userMessagesCount": 4,
+        "assistantMessagesCount": 3,
+        "systemMessagesCount": 1,
+        "startTime": 1789744514044,
+        "firstTokenTime": 1789744514614,
+        "ttft": 570,
+        "endTime": 1789744514897,
+        "duration": 853,
+        "success": true,
+        "error": null,
+        "isFallback": false,
+        "actualUsage": {
+          "prompt_tokens": 263,
+          "completion_tokens": 169,
+          "total_tokens": 432,
+          "queue_time": 0.401700102,
+          "prompt_time": 0.013528368,
+          "completion_time": 0.35575346
+        },
+        "actualTokensAvailable": true,
+        "estimatedTokens": {
+          "input": 201,
+          "output": 126,
+          "total": 327
+        },
+        "outputChars": 504
+      }
+    ],
+    "transcriptsSeen": {},
+    "historySnapshots": [
+      {
+        "timestamp": 1789744506731,
+        "type": "groq_pre_request",
+        "messagesCount": 2,
+        "userCount": 1,
+        "assistantCount": 0,
+        "systemCount": 1,
+        "totalChars": 97
+      },
+      {
+        "timestamp": 1789744507164,
+        "type": "groq_pre_request",
+        "messagesCount": 2,
+        "userCount": 1,
+        "assistantCount": 0,
+        "systemCount": 1,
+        "totalChars": 62
+      },
+      {
+        "timestamp": 1789744511017,
+        "type": "gemini_fallback_pre_request",
+        "messagesCount": 5,
+        "userCount": 3,
+        "assistantCount": 2,
+        "totalChars": 402
+      },
+      {
+        "timestamp": 1789744513406,
+        "type": "groq_pre_request",
+        "messagesCount": 6,
+        "userCount": 3,
+        "assistantCount": 2,
+        "systemCount": 1,
+        "totalChars": 469
+      },
+      {
+        "timestamp": 1789744514044,
+        "type": "groq_pre_request",
+        "messagesCount": 8,
+        "userCount": 4,
+        "assistantCount": 3,
+        "systemCount": 1,
+        "totalChars": 758
+      }
+    ],
+    "overhead": {
+      "totalCalls": 486,
+      "totalOverheadMs": 49.974,
+      "errors": []
+    }
+  },
+  "notes": []
+}

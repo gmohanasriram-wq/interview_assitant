@@ -1,4 +1,4 @@
-const { BrowserWindow, globalShortcut, ipcMain, screen } = require('electron');
+const { BrowserWindow, globalShortcut, ipcMain, screen, shell } = require('electron');
 const path = require('node:path');
 const storage = require('../storage');
 
@@ -22,8 +22,9 @@ function createWindow(sendToRenderer, geminiSessionRef) {
         hasShadow: false,
         alwaysOnTop: true,
         webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false, // TODO: change to true
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, '../preload.js'),
             backgroundThrottling: false,
             enableBlinkFeatures: 'GetDisplayMedia',
             webSecurity: true,
@@ -44,6 +45,34 @@ function createWindow(sendToRenderer, geminiSessionRef) {
 
     mainWindow.setContentProtection(true);
     mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+
+    // Restrict child window creation and route valid external links safely
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        try {
+            const parsed = new URL(url);
+            if (['http:', 'https:'].includes(parsed.protocol)) {
+                shell.openExternal(url);
+            }
+        } catch (e) {
+            console.error('Blocked invalid window open URL:', url, e);
+        }
+        return { action: 'deny' };
+    });
+
+    // Prevent untrusted in-app navigation
+    mainWindow.webContents.on('will-navigate', (event, navigationUrl) => {
+        try {
+            const parsed = new URL(navigationUrl);
+            if (parsed.protocol !== 'file:') {
+                event.preventDefault();
+                if (['http:', 'https:'].includes(parsed.protocol)) {
+                    shell.openExternal(navigationUrl);
+                }
+            }
+        } catch (e) {
+            event.preventDefault();
+        }
+    });
 
     // Hide from Windows taskbar
     if (process.platform === 'win32') {

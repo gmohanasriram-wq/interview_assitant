@@ -1,0 +1,43 @@
+{
+  "timestamp": "2026-09-18T15:51:15.654Z",
+  "tests": {
+    "controlled_failure": {
+      "classification": "AUTOMATED",
+      "groqIntercepted": true,
+      "success": true,
+      "error": null,
+      "geminiCalled": true,
+      "geminiModel": "gemini-3.5-flash",
+      "groqFailedRecorded": true,
+      "geminiSuccessRecorded": true,
+      "uiUpdatesCount": 2,
+      "lastUIContent": "In distributed systems, idempotency ensures that retrying an operation multiple times produces the same result and system state as executing it once.",
+      "historyMessagesCount": 0,
+      "conversationTurns": []
+    },
+    "groq_404": {
+      "classification": "AUTOMATED",
+      "success": true,
+      "error": null,
+      "status": "PASS"
+    },
+    "groq_429": {
+      "classification": "AUTOMATED",
+      "success": true,
+      "error": null,
+      "status": "PASS"
+    },
+    "groq_network_error": {
+      "classification": "AUTOMATED",
+      "success": true,
+      "error": null,
+      "status": "PASS"
+    },
+    "groq_timeout": {
+      "classification": "OBSERVED",
+      "hasClientTimeout": false,
+      "status": "VULNERABLE",
+      "details": "No AbortSignal/timeout configured in fetch. A frozen socket will hang indefinitely."
+    }
+  }
+}

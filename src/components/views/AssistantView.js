@@ -314,7 +314,7 @@ export class AssistantView extends LitElement {
         this.responses = [];
         this.currentResponseIndex = -1;
         this.selectedProfile = 'interview';
-        this.onSendText = () => {};
+        this.onSendText = () => { };
         this.isAnalyzing = false;
         this._animFrame = null;
     }
@@ -343,10 +343,12 @@ export class AssistantView extends LitElement {
                 window.marked.setOptions({
                     breaks: true,
                     gfm: true,
-                    sanitize: false,
                 });
                 let rendered = window.marked.parse(content);
                 rendered = this.wrapWordsInSpans(rendered);
+                if (typeof window !== 'undefined' && window.DOMPurify) {
+                    rendered = window.DOMPurify.sanitize(rendered);
+                }
                 return rendered;
             } catch (error) {
                 console.warn('Error parsing markdown:', error);
@@ -427,18 +429,16 @@ export class AssistantView extends LitElement {
     connectedCallback() {
         super.connectedCallback();
 
-        if (window.require) {
-            const { ipcRenderer } = window.require('electron');
-
+        if (window.electronAPI) {
             this.handlePreviousResponse = () => this.navigateToPreviousResponse();
             this.handleNextResponse = () => this.navigateToNextResponse();
             this.handleScrollUp = () => this.scrollResponseUp();
             this.handleScrollDown = () => this.scrollResponseDown();
 
-            ipcRenderer.on('navigate-previous-response', this.handlePreviousResponse);
-            ipcRenderer.on('navigate-next-response', this.handleNextResponse);
-            ipcRenderer.on('scroll-response-up', this.handleScrollUp);
-            ipcRenderer.on('scroll-response-down', this.handleScrollDown);
+            window.electronAPI.on('navigate-previous-response', this.handlePreviousResponse);
+            window.electronAPI.on('navigate-next-response', this.handleNextResponse);
+            window.electronAPI.on('scroll-response-up', this.handleScrollUp);
+            window.electronAPI.on('scroll-response-down', this.handleScrollDown);
         }
     }
 
@@ -446,12 +446,11 @@ export class AssistantView extends LitElement {
         super.disconnectedCallback();
         this._stopWaveformAnimation();
 
-        if (window.require) {
-            const { ipcRenderer } = window.require('electron');
-            if (this.handlePreviousResponse) ipcRenderer.removeListener('navigate-previous-response', this.handlePreviousResponse);
-            if (this.handleNextResponse) ipcRenderer.removeListener('navigate-next-response', this.handleNextResponse);
-            if (this.handleScrollUp) ipcRenderer.removeListener('scroll-response-up', this.handleScrollUp);
-            if (this.handleScrollDown) ipcRenderer.removeListener('scroll-response-down', this.handleScrollDown);
+        if (window.electronAPI) {
+            if (this.handlePreviousResponse) window.electronAPI.removeListener('navigate-previous-response', this.handlePreviousResponse);
+            if (this.handleNextResponse) window.electronAPI.removeListener('navigate-next-response', this.handleNextResponse);
+            if (this.handleScrollUp) window.electronAPI.removeListener('scroll-response-up', this.handleScrollUp);
+            if (this.handleScrollDown) window.electronAPI.removeListener('scroll-response-down', this.handleScrollDown);
         }
     }
 

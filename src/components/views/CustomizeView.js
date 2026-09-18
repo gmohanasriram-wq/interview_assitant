@@ -324,9 +324,8 @@ export class CustomizeView extends LitElement {
 
     async saveKeybinds() {
         await cheatingDaddy.storage.setKeybinds(this.keybinds);
-        if (window.require) {
-            const { ipcRenderer } = window.require('electron');
-            ipcRenderer.send('update-keybinds', this.keybinds);
+        if (window.electronAPI) {
+            window.electronAPI.updateKeybinds(this.keybinds);
         }
     }
 
@@ -371,10 +370,9 @@ export class CustomizeView extends LitElement {
     async handleGoogleSearchChange(e) {
         this.googleSearchEnabled = e.target.checked;
         await cheatingDaddy.storage.updatePreference('googleSearchEnabled', this.googleSearchEnabled);
-        if (window.require) {
+        if (window.electronAPI) {
             try {
-                const { ipcRenderer } = window.require('electron');
-                await ipcRenderer.invoke('update-google-search-setting', this.googleSearchEnabled);
+                await window.electronAPI.updateGoogleSearchSetting(this.googleSearchEnabled);
             } catch (error) {
                 console.error('Failed to notify main process:', error);
             }
@@ -464,9 +462,8 @@ export class CustomizeView extends LitElement {
     async resetKeybinds() {
         this.keybinds = this.getDefaultKeybinds();
         await cheatingDaddy.storage.setKeybinds(null);
-        if (window.require) {
-            const { ipcRenderer } = window.require('electron');
-            ipcRenderer.send('update-keybinds', this.keybinds);
+        if (window.electronAPI) {
+            window.electronAPI.updateKeybinds(this.keybinds);
         }
         this.requestUpdate();
     }
@@ -498,9 +495,8 @@ export class CustomizeView extends LitElement {
             // Restore keybinds
             this.keybinds = this.getDefaultKeybinds();
             await cheatingDaddy.storage.setKeybinds(null);
-            if (window.require) {
-                const { ipcRenderer } = window.require('electron');
-                ipcRenderer.send('update-keybinds', this.keybinds);
+            if (window.electronAPI) {
+                window.electronAPI.updateKeybinds(this.keybinds);
             }
 
             // Apply to local state
@@ -551,9 +547,8 @@ export class CustomizeView extends LitElement {
                 this.clearStatusMessage = 'Closing application...';
                 this.requestUpdate();
                 setTimeout(async () => {
-                    if (window.require) {
-                        const { ipcRenderer } = window.require('electron');
-                        await ipcRenderer.invoke('quit-application');
+                    if (window.electronAPI) {
+                        await window.electronAPI.quitApplication();
                     }
                 }, 1000);
             }, 2000);

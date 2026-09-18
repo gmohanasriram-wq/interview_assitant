@@ -1,5 +1,4 @@
 // renderer.js
-const { ipcRenderer } = require('electron');
 
 let mediaStream = null;
 let screenshotInterval = null;
@@ -18,96 +17,97 @@ let offscreenCanvas = null;
 let offscreenContext = null;
 let currentImageQuality = 'medium'; // Store current image quality for manual screenshots
 let isPushToTalk = false; // Push-to-talk state
+let isCapturingScreenshot = false; // Guard against rapid concurrent capture dispatches
 
-const isLinux = process.platform === 'linux';
-const isMacOS = process.platform === 'darwin';
+const isLinux = window.electronAPI ? window.electronAPI.isLinux : false;
+const isMacOS = window.electronAPI ? window.electronAPI.isMacOS : false;
 
 // ============ STORAGE API ============
 // Wrapper for IPC-based storage access
 const storage = {
     // Config
     async getConfig() {
-        const result = await ipcRenderer.invoke('storage:get-config');
+        const result = await window.electronAPI.storage.getConfig();
         return result.success ? result.data : {};
     },
     async setConfig(config) {
-        return ipcRenderer.invoke('storage:set-config', config);
+        return window.electronAPI.storage.setConfig(config);
     },
     async updateConfig(key, value) {
-        return ipcRenderer.invoke('storage:update-config', key, value);
+        return window.electronAPI.storage.updateConfig(key, value);
     },
 
     // Credentials
     async getCredentials() {
-        const result = await ipcRenderer.invoke('storage:get-credentials');
+        const result = await window.electronAPI.storage.getCredentials();
         return result.success ? result.data : {};
     },
     async setCredentials(credentials) {
-        return ipcRenderer.invoke('storage:set-credentials', credentials);
+        return window.electronAPI.storage.setCredentials(credentials);
     },
     async getApiKey() {
-        const result = await ipcRenderer.invoke('storage:get-api-key');
+        const result = await window.electronAPI.storage.getApiKey();
         return result.success ? result.data : '';
     },
     async setApiKey(apiKey) {
-        return ipcRenderer.invoke('storage:set-api-key', apiKey);
+        return window.electronAPI.storage.setApiKey(apiKey);
     },
     async getGroqApiKey() {
-        const result = await ipcRenderer.invoke('storage:get-groq-api-key');
+        const result = await window.electronAPI.storage.getGroqApiKey();
         return result.success ? result.data : '';
     },
     async setGroqApiKey(groqApiKey) {
-        return ipcRenderer.invoke('storage:set-groq-api-key', groqApiKey);
+        return window.electronAPI.storage.setGroqApiKey(groqApiKey);
     },
 
     // Preferences
     async getPreferences() {
-        const result = await ipcRenderer.invoke('storage:get-preferences');
+        const result = await window.electronAPI.storage.getPreferences();
         return result.success ? result.data : {};
     },
     async setPreferences(preferences) {
-        return ipcRenderer.invoke('storage:set-preferences', preferences);
+        return window.electronAPI.storage.setPreferences(preferences);
     },
     async updatePreference(key, value) {
-        return ipcRenderer.invoke('storage:update-preference', key, value);
+        return window.electronAPI.storage.updatePreference(key, value);
     },
 
     // Keybinds
     async getKeybinds() {
-        const result = await ipcRenderer.invoke('storage:get-keybinds');
+        const result = await window.electronAPI.storage.getKeybinds();
         return result.success ? result.data : null;
     },
     async setKeybinds(keybinds) {
-        return ipcRenderer.invoke('storage:set-keybinds', keybinds);
+        return window.electronAPI.storage.setKeybinds(keybinds);
     },
 
     // Sessions (History)
     async getAllSessions() {
-        const result = await ipcRenderer.invoke('storage:get-all-sessions');
+        const result = await window.electronAPI.storage.getAllSessions();
         return result.success ? result.data : [];
     },
     async getSession(sessionId) {
-        const result = await ipcRenderer.invoke('storage:get-session', sessionId);
+        const result = await window.electronAPI.storage.getSession(sessionId);
         return result.success ? result.data : null;
     },
     async saveSession(sessionId, data) {
-        return ipcRenderer.invoke('storage:save-session', sessionId, data);
+        return window.electronAPI.storage.saveSession(sessionId, data);
     },
     async deleteSession(sessionId) {
-        return ipcRenderer.invoke('storage:delete-session', sessionId);
+        return window.electronAPI.storage.deleteSession(sessionId);
     },
     async deleteAllSessions() {
-        return ipcRenderer.invoke('storage:delete-all-sessions');
+        return window.electronAPI.storage.deleteAllSessions();
     },
 
     // Clear all
     async clearAll() {
-        return ipcRenderer.invoke('storage:clear-all');
+        return window.electronAPI.storage.clearAll();
     },
 
     // Limits
     async getTodayLimits() {
-        const result = await ipcRenderer.invoke('storage:get-today-limits');
+        const result = await window.electronAPI.storage.getTodayLimits();
         return result.success ? result.data : { flash: { count: 0 }, flashLite: { count: 0 } };
     }
 };
@@ -147,7 +147,7 @@ async function initializeGemini(profile = 'interview', language = 'en-US') {
     const apiKey = await storage.getApiKey();
     if (apiKey) {
         const prefs = await storage.getPreferences();
-        const success = await ipcRenderer.invoke('initialize-gemini', apiKey, prefs.customPrompt || '', profile, language);
+        const success = await window.electronAPI.initializeGemini(apiKey, prefs.customPrompt || '', profile, language);
         if (success) {
             cheatingDaddy.setStatus('Live');
         } else {
@@ -163,7 +163,7 @@ async function initializeLocal(profile = 'interview') {
     const whisperModel = prefs.whisperModel || 'Xenova/whisper-small';
     const customPrompt = prefs.customPrompt || '';
 
-    const success = await ipcRenderer.invoke('initialize-local', ollamaHost, ollamaModel, whisperModel, profile, customPrompt);
+    const success = await window.electronAPI.initializeLocal(ollamaHost, ollamaModel, whisperModel, profile, customPrompt);
     if (success) {
         cheatingDaddy.setStatus('Local AI Live');
         return true;
@@ -182,7 +182,7 @@ async function initializeCloud(profile = 'interview') {
     }
 
     const prefs = await storage.getPreferences();
-    const success = await ipcRenderer.invoke('initialize-cloud', token, profile, prefs.customPrompt || '');
+    const success = await window.electronAPI.initializeCloud(token, profile, prefs.customPrompt || '');
     if (success) {
         cheatingDaddy.setStatus('Live');
         return true;
@@ -193,7 +193,7 @@ async function initializeCloud(profile = 'interview') {
 }
 
 // Listen for status updates
-ipcRenderer.on('update-status', (event, status) => {
+window.electronAPI.on('update-status', status => {
     console.log('Status update:', status);
     cheatingDaddy.setStatus(status);
 });
@@ -212,7 +212,7 @@ async function startCapture(screenshotIntervalSeconds = 5, imageQuality = 'mediu
             console.log('Starting macOS capture with SystemAudioDump...');
 
             // Start macOS audio capture
-            const audioResult = await ipcRenderer.invoke('start-macos-audio');
+            const audioResult = await window.electronAPI.startMacOSAudio();
             if (!audioResult.success) {
                 throw new Error('Failed to start macOS audio capture: ' + audioResult.error);
             }
@@ -389,7 +389,7 @@ function setupLinuxMicProcessing(micStream) {
             const base64Data = arrayBufferToBase64(pcmData16.buffer);
 
             if (isPushToTalk) {
-                await ipcRenderer.invoke('send-mic-audio-content', {
+                await window.electronAPI.sendMicAudioContent({
                     data: base64Data,
                     mimeType: 'audio/pcm;rate=24000',
                 });
@@ -423,7 +423,7 @@ function setupLinuxSystemAudioProcessing() {
             const pcmData16 = convertFloat32ToInt16(chunk);
             const base64Data = arrayBufferToBase64(pcmData16.buffer);
 
-            await ipcRenderer.invoke('send-audio-content', {
+            await window.electronAPI.sendAudioContent({
                 data: base64Data,
                 mimeType: 'audio/pcm;rate=24000',
             });
@@ -453,7 +453,7 @@ function setupWindowsLoopbackProcessing() {
             const pcmData16 = convertFloat32ToInt16(chunk);
             const base64Data = arrayBufferToBase64(pcmData16.buffer);
 
-            await ipcRenderer.invoke('send-audio-content', {
+            await window.electronAPI.sendAudioContent({
                 data: base64Data,
                 mimeType: 'audio/pcm;rate=24000',
             });
@@ -465,95 +465,114 @@ function setupWindowsLoopbackProcessing() {
 }
 
 async function captureScreenshot(imageQuality = 'medium', isManual = false) {
-    console.log(`Capturing ${isManual ? 'manual' : 'automated'} screenshot...`);
-    if (!mediaStream) return;
-
-    // Lazy init of video element
-    if (!hiddenVideo) {
-        hiddenVideo = document.createElement('video');
-        hiddenVideo.srcObject = mediaStream;
-        hiddenVideo.muted = true;
-        hiddenVideo.playsInline = true;
-        await hiddenVideo.play();
-
-        await new Promise(resolve => {
-            if (hiddenVideo.readyState >= 2) return resolve();
-            hiddenVideo.onloadedmetadata = () => resolve();
-        });
-
-        // Lazy init of canvas based on video dimensions
-        offscreenCanvas = document.createElement('canvas');
-        offscreenCanvas.width = hiddenVideo.videoWidth;
-        offscreenCanvas.height = hiddenVideo.videoHeight;
-        offscreenContext = offscreenCanvas.getContext('2d');
-    }
-
-    // Check if video is ready
-    if (hiddenVideo.readyState < 2) {
-        console.warn('Video not ready yet, skipping screenshot');
+    if (isCapturingScreenshot) {
+        console.log('Screenshot capture already in progress, skipping');
         return;
     }
+    isCapturingScreenshot = true;
 
-    offscreenContext.drawImage(hiddenVideo, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
+    try {
+        console.log(`Capturing ${isManual ? 'manual' : 'automated'} screenshot...`);
+        if (!mediaStream) return;
 
-    // Check if image was drawn properly by sampling a pixel
-    const imageData = offscreenContext.getImageData(0, 0, 1, 1);
-    const isBlank = imageData.data.every((value, index) => {
-        // Check if all pixels are black (0,0,0) or transparent
-        return index === 3 ? true : value === 0;
-    });
+        // Lazy init of video element
+        if (!hiddenVideo) {
+            hiddenVideo = document.createElement('video');
+            hiddenVideo.srcObject = mediaStream;
+            hiddenVideo.muted = true;
+            hiddenVideo.playsInline = true;
+            await hiddenVideo.play();
 
-    if (isBlank) {
-        console.warn('Screenshot appears to be blank/black');
-    }
+            await new Promise(resolve => {
+                if (hiddenVideo.readyState >= 2) return resolve();
+                hiddenVideo.onloadedmetadata = () => resolve();
+            });
 
-    let qualityValue;
-    switch (imageQuality) {
-        case 'high':
-            qualityValue = 0.9;
-            break;
-        case 'medium':
-            qualityValue = 0.7;
-            break;
-        case 'low':
-            qualityValue = 0.5;
-            break;
-        default:
-            qualityValue = 0.7; // Default to medium
-    }
+            offscreenCanvas = document.createElement('canvas');
+            offscreenCanvas.width = hiddenVideo.videoWidth;
+            offscreenCanvas.height = hiddenVideo.videoHeight;
+            offscreenContext = offscreenCanvas.getContext('2d');
+        }
 
-    offscreenCanvas.toBlob(
-        async blob => {
-            if (!blob) {
-                console.error('Failed to create blob from canvas');
-                return;
-            }
+        // Check if video is ready
+        if (hiddenVideo.readyState < 2) {
+            console.warn('Video not ready yet, skipping screenshot');
+            return;
+        }
 
-            const reader = new FileReader();
-            reader.onloadend = async () => {
-                const base64data = reader.result.split(',')[1];
+        // Downscale to max 1280px wide for optimal token usage and transfer speed
+        const MAX_WIDTH = 1280;
+        const srcW = hiddenVideo.videoWidth;
+        const srcH = hiddenVideo.videoHeight;
+        let destW = srcW;
+        let destH = srcH;
+        if (srcW > MAX_WIDTH) {
+            destW = MAX_WIDTH;
+            destH = Math.round(srcH * (MAX_WIDTH / srcW));
+        }
+        offscreenCanvas.width = destW;
+        offscreenCanvas.height = destH;
+        offscreenContext.drawImage(hiddenVideo, 0, 0, destW, destH);
 
-                // Validate base64 data
-                if (!base64data || base64data.length < 100) {
-                    console.error('Invalid base64 data generated');
+        // Check if image was drawn properly by sampling a pixel
+        const imageData = offscreenContext.getImageData(0, 0, 1, 1);
+        const isBlank = imageData.data.every((value, index) => {
+            return index === 3 ? true : value === 0;
+        });
+
+        if (isBlank) {
+            console.warn('Screenshot appears to be blank/black');
+        }
+
+        let qualityValue;
+        switch (imageQuality) {
+            case 'high':
+                qualityValue = 0.85;
+                break;
+            case 'medium':
+                qualityValue = 0.6;
+                break;
+            case 'low':
+                qualityValue = 0.4;
+                break;
+            default:
+                qualityValue = 0.6;
+        }
+
+        offscreenCanvas.toBlob(
+            async blob => {
+                if (!blob) {
+                    console.error('Failed to create blob from canvas');
                     return;
                 }
 
-                const result = await ipcRenderer.invoke('send-image-content', {
-                    data: base64data,
-                });
+                const reader = new FileReader();
+                reader.onloadend = async () => {
+                    const base64data = reader.result.split(',')[1];
 
-                if (result.success) {
-                    console.log(`Image sent successfully (${offscreenCanvas.width}x${offscreenCanvas.height})`);
-                } else {
-                    console.error('Failed to send image:', result.error);
-                }
-            };
-            reader.readAsDataURL(blob);
-        },
-        'image/jpeg',
-        qualityValue
-    );
+                    if (!base64data || base64data.length < 100) {
+                        console.error('Invalid base64 data generated');
+                        return;
+                    }
+
+                    const result = await window.electronAPI.sendImageContent({
+                        data: base64data,
+                    });
+
+                    if (result.success) {
+                        console.log(`Image sent successfully (${destW}x${destH})`);
+                    } else {
+                        console.error('Failed to send image:', result.error);
+                    }
+                };
+                reader.readAsDataURL(blob);
+            },
+            'image/jpeg',
+            qualityValue
+        );
+    } finally {
+        isCapturingScreenshot = false;
+    }
 }
 
 const MANUAL_SCREENSHOT_PROMPT = `Help me on this page, give me the answer no bs, complete answer.
@@ -562,106 +581,114 @@ If its a question about the website, give me the answer no bs, complete answer.
 If its a mcq question, give me the answer no bs, complete answer.`;
 
 async function captureManualScreenshot(imageQuality = null) {
-    console.log('Manual screenshot triggered');
-    const quality = imageQuality || currentImageQuality;
-
-    if (!mediaStream) {
-        console.error('No media stream available');
+    if (isCapturingScreenshot) {
+        console.log('Screenshot capture already in progress, skipping');
         return;
     }
+    isCapturingScreenshot = true;
 
-    // Lazy init of video element
-    if (!hiddenVideo) {
-        hiddenVideo = document.createElement('video');
-        hiddenVideo.srcObject = mediaStream;
-        hiddenVideo.muted = true;
-        hiddenVideo.playsInline = true;
-        await hiddenVideo.play();
+    try {
+        console.log('Manual screenshot triggered');
+        const quality = imageQuality || currentImageQuality;
 
-        await new Promise(resolve => {
-            if (hiddenVideo.readyState >= 2) return resolve();
-            hiddenVideo.onloadedmetadata = () => resolve();
-        });
+        if (!mediaStream) {
+            console.error('No media stream available');
+            return;
+        }
 
-        // Lazy init of canvas based on video dimensions
-        offscreenCanvas = document.createElement('canvas');
-        offscreenCanvas.width = hiddenVideo.videoWidth;
-        offscreenCanvas.height = hiddenVideo.videoHeight;
-        offscreenContext = offscreenCanvas.getContext('2d');
-    }
+        // Lazy init of video element
+        if (!hiddenVideo) {
+            hiddenVideo = document.createElement('video');
+            hiddenVideo.srcObject = mediaStream;
+            hiddenVideo.muted = true;
+            hiddenVideo.playsInline = true;
+            await hiddenVideo.play();
 
-    // Check if video is ready
-    if (hiddenVideo.readyState < 2) {
-        console.warn('Video not ready yet, skipping screenshot');
-        return;
-    }
+            await new Promise(resolve => {
+                if (hiddenVideo.readyState >= 2) return resolve();
+                hiddenVideo.onloadedmetadata = () => resolve();
+            });
 
-    // Downscale to max 1280px wide for faster transfer — vision models don't need 4K
-    const MAX_WIDTH = 1280;
-    const srcW = hiddenVideo.videoWidth;
-    const srcH = hiddenVideo.videoHeight;
-    let destW = srcW;
-    let destH = srcH;
-    if (srcW > MAX_WIDTH) {
-        destW = MAX_WIDTH;
-        destH = Math.round(srcH * (MAX_WIDTH / srcW));
-    }
-    offscreenCanvas.width = destW;
-    offscreenCanvas.height = destH;
-    offscreenContext.drawImage(hiddenVideo, 0, 0, destW, destH);
+            offscreenCanvas = document.createElement('canvas');
+            offscreenCanvas.width = hiddenVideo.videoWidth;
+            offscreenCanvas.height = hiddenVideo.videoHeight;
+            offscreenContext = offscreenCanvas.getContext('2d');
+        }
 
-    let qualityValue;
-    switch (quality) {
-        case 'high':
-            qualityValue = 0.85;
-            break;
-        case 'medium':
-            qualityValue = 0.6;
-            break;
-        case 'low':
-            qualityValue = 0.4;
-            break;
-        default:
-            qualityValue = 0.6;
-    }
+        // Check if video is ready
+        if (hiddenVideo.readyState < 2) {
+            console.warn('Video not ready yet, skipping screenshot');
+            return;
+        }
 
-    offscreenCanvas.toBlob(
-        async blob => {
-            if (!blob) {
-                console.error('Failed to create blob from canvas');
-                return;
-            }
+        // Downscale to max 1280px wide for faster transfer — vision models don't need 4K
+        const MAX_WIDTH = 1280;
+        const srcW = hiddenVideo.videoWidth;
+        const srcH = hiddenVideo.videoHeight;
+        let destW = srcW;
+        let destH = srcH;
+        if (srcW > MAX_WIDTH) {
+            destW = MAX_WIDTH;
+            destH = Math.round(srcH * (MAX_WIDTH / srcW));
+        }
+        offscreenCanvas.width = destW;
+        offscreenCanvas.height = destH;
+        offscreenContext.drawImage(hiddenVideo, 0, 0, destW, destH);
 
-            const reader = new FileReader();
-            reader.onloadend = async () => {
-                const base64data = reader.result.split(',')[1];
+        let qualityValue;
+        switch (quality) {
+            case 'high':
+                qualityValue = 0.85;
+                break;
+            case 'medium':
+                qualityValue = 0.6;
+                break;
+            case 'low':
+                qualityValue = 0.4;
+                break;
+            default:
+                qualityValue = 0.6;
+        }
 
-                if (!base64data || base64data.length < 100) {
-                    console.error('Invalid base64 data generated');
+        offscreenCanvas.toBlob(
+            async blob => {
+                if (!blob) {
+                    console.error('Failed to create blob from canvas');
                     return;
                 }
 
-                console.log(`Sending image: ${destW}x${destH}, ~${Math.round(base64data.length / 1024)}KB`);
+                const reader = new FileReader();
+                reader.onloadend = async () => {
+                    const base64data = reader.result.split(',')[1];
 
-                // Send image with prompt to HTTP API (response streams via IPC events)
-                const result = await ipcRenderer.invoke('send-image-content', {
-                    data: base64data,
-                    prompt: MANUAL_SCREENSHOT_PROMPT,
-                });
+                    if (!base64data || base64data.length < 100) {
+                        console.error('Invalid base64 data generated');
+                        return;
+                    }
 
-                if (result.success) {
-                    console.log(`Image response completed from ${result.model}`);
-                    // Response already displayed via streaming events (new-response/update-response)
-                } else {
-                    console.error('Failed to get image response:', result.error);
-                    cheatingDaddy.addNewResponse(`Error: ${result.error}`);
-                }
-            };
-            reader.readAsDataURL(blob);
-        },
-        'image/jpeg',
-        qualityValue
-    );
+                    console.log(`Sending image: ${destW}x${destH}, ~${Math.round(base64data.length / 1024)}KB`);
+
+                    // Send image with prompt to HTTP API (response streams via IPC events)
+                    const result = await window.electronAPI.sendImageContent({
+                        data: base64data,
+                        prompt: MANUAL_SCREENSHOT_PROMPT,
+                    });
+
+                    if (result.success) {
+                        console.log(`Image response completed from ${result.model}`);
+                    } else {
+                        console.error('Failed to get image response:', result.error);
+                        cheatingDaddy.addNewResponse(`Error: ${result.error}`);
+                    }
+                };
+                reader.readAsDataURL(blob);
+            },
+            'image/jpeg',
+            qualityValue
+        );
+    } finally {
+        isCapturingScreenshot = false;
+    }
 }
 
 // Expose functions to global scope for external access
@@ -706,7 +733,7 @@ function stopCapture() {
 
     // Stop macOS audio capture if running
     if (isMacOS) {
-        ipcRenderer.invoke('stop-macos-audio').catch(err => {
+        window.electronAPI.stopMacOSAudio().catch(err => {
             console.error('Error stopping macOS audio:', err);
         });
     }
@@ -729,7 +756,7 @@ async function sendTextMessage(text) {
     }
 
     try {
-        const result = await ipcRenderer.invoke('send-text-message', text);
+        const result = await window.electronAPI.sendTextMessage(text);
         if (result.success) {
             console.log('Text message sent successfully');
         } else {
@@ -743,7 +770,7 @@ async function sendTextMessage(text) {
 }
 
 // Listen for conversation data from main process and save to storage
-ipcRenderer.on('save-conversation-turn', async (event, data) => {
+window.electronAPI.on('save-conversation-turn', async data => {
     try {
         await storage.saveSession(data.sessionId, { conversationHistory: data.fullHistory });
         console.log('Conversation session saved:', data.sessionId);
@@ -753,7 +780,7 @@ ipcRenderer.on('save-conversation-turn', async (event, data) => {
 });
 
 // Listen for session context (profile info) when session starts
-ipcRenderer.on('save-session-context', async (event, data) => {
+window.electronAPI.on('save-session-context', async data => {
     try {
         await storage.saveSession(data.sessionId, {
             profile: data.profile,
@@ -766,7 +793,7 @@ ipcRenderer.on('save-session-context', async (event, data) => {
 });
 
 // Listen for screen analysis responses (from ctrl+enter)
-ipcRenderer.on('save-screen-analysis', async (event, data) => {
+window.electronAPI.on('save-screen-analysis', async data => {
     try {
         await storage.saveSession(data.sessionId, {
             screenAnalysisHistory: data.fullHistory,
@@ -780,7 +807,7 @@ ipcRenderer.on('save-screen-analysis', async (event, data) => {
 });
 
 // Listen for emergency erase command from main process
-ipcRenderer.on('clear-sensitive-data', async () => {
+window.electronAPI.on('clear-sensitive-data', async () => {
     console.log('Clearing all data...');
     await storage.clearAll();
 });
@@ -1026,7 +1053,7 @@ const theme = {
 // Consolidated cheatingDaddy object - all functions in one place
 const cheatingDaddy = {
     // App version
-    getVersion: async () => ipcRenderer.invoke('get-app-version'),
+    getVersion: async () => window.electronAPI.getAppVersion(),
 
     // Element access
     element: () => cheatingDaddyApp,
@@ -1079,7 +1106,7 @@ function initSpaceKeyLogging() {
             isPushToTalk = false;
             console.log('SPACE UP');
             // Trigger pending transcript processing
-            ipcRenderer.invoke('trigger-pending-response').catch(err => {
+            window.electronAPI.triggerPendingResponse().catch(err => {
                 console.error('Failed to trigger pending response:', err);
             });
         }
