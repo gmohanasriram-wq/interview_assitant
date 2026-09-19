@@ -93,3 +93,11 @@ typings/
 out/
 .specstory
 .specstory/
+
+# Temporary audio test files (preserve integration test audio)
+*.wav
+!diag_speech_long.wav
+
+# Generated experiment and benchmark result files
+*_results.json
+*_results.*.json
