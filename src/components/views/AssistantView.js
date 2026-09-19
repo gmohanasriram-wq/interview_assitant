@@ -317,6 +317,7 @@ export class AssistantView extends LitElement {
         this.onSendText = () => { };
         this.isAnalyzing = false;
         this._animFrame = null;
+        this._renderRafId = null;
     }
 
     getProfileNames() {
@@ -345,7 +346,7 @@ export class AssistantView extends LitElement {
                     gfm: true,
                 });
                 let rendered = window.marked.parse(content);
-                rendered = this.wrapWordsInSpans(rendered);
+                // wrapWordsInSpans bypassed: word animation is inactive, eliminating DOMParser recursion on every chunk
                 if (typeof window !== 'undefined' && window.DOMPurify) {
                     rendered = window.DOMPurify.sanitize(rendered);
                 }
@@ -445,6 +446,11 @@ export class AssistantView extends LitElement {
     disconnectedCallback() {
         super.disconnectedCallback();
         this._stopWaveformAnimation();
+        if (this._renderRafId) {
+            const caf = typeof cancelAnimationFrame === 'function' ? cancelAnimationFrame : clearTimeout;
+            caf(this._renderRafId);
+            this._renderRafId = null;
+        }
 
         if (window.electronAPI) {
             if (this.handlePreviousResponse) window.electronAPI.removeListener('navigate-previous-response', this.handlePreviousResponse);
@@ -627,13 +633,18 @@ export class AssistantView extends LitElement {
 
     firstUpdated() {
         super.firstUpdated();
-        this.updateResponseContent();
+        this.updateResponseContent(true);
     }
 
     updated(changedProperties) {
         super.updated(changedProperties);
-        if (changedProperties.has('responses') || changedProperties.has('currentResponseIndex')) {
-            this.updateResponseContent();
+        if (changedProperties.has('currentResponseIndex')) {
+            this.updateResponseContent(true);
+        } else if (changedProperties.has('responses')) {
+            const oldResponses = changedProperties.get('responses');
+            // If new response or initial chunk, render immediately for instant TTFT; otherwise coalesce streaming
+            const isNewResponse = !oldResponses || oldResponses.length !== this.responses.length;
+            this.updateResponseContent(isNewResponse);
         }
 
         if (changedProperties.has('isAnalyzing')) {
@@ -651,15 +662,39 @@ export class AssistantView extends LitElement {
         }
     }
 
-    updateResponseContent() {
-        const container = this.shadowRoot.querySelector('#responseContainer');
+    _renderResponseContentNow() {
+        const container = this.shadowRoot ? this.shadowRoot.querySelector('#responseContainer') : null;
         if (container) {
             const currentResponse = this.getCurrentResponse();
             const renderedResponse = this.renderMarkdown(currentResponse);
-            container.innerHTML = renderedResponse;
+            if (container.innerHTML !== renderedResponse) {
+                container.innerHTML = renderedResponse;
+            }
             if (this.shouldAnimateResponse) {
                 this.dispatchEvent(new CustomEvent('response-animation-complete', { bubbles: true, composed: true }));
             }
+        }
+    }
+
+    updateResponseContent(immediate = false) {
+        const caf = typeof cancelAnimationFrame === 'function' ? cancelAnimationFrame : clearTimeout;
+        const raf = typeof requestAnimationFrame === 'function' ? requestAnimationFrame : (cb => setTimeout(cb, 16));
+
+        if (immediate) {
+            if (this._renderRafId) {
+                caf(this._renderRafId);
+                this._renderRafId = null;
+            }
+            this._renderResponseContentNow();
+            return;
+        }
+
+        // Coalesce rapid streaming chunks within the same animation frame
+        if (!this._renderRafId) {
+            this._renderRafId = raf(() => {
+                this._renderRafId = null;
+                this._renderResponseContentNow();
+            });
         }
     }
 

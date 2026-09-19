@@ -954,7 +954,7 @@ async function initializeGeminiSession(apiKey, customPrompt = '', profile = 'int
                     automaticActivityDetection: {
                         disabled: false,
                         endOfSpeechSensitivity: EndSensitivity.END_SENSITIVITY_LOW,
-                        silenceDurationMs: 1500,
+                        silenceDurationMs: 1000,
                     },
                 },
                 speechConfig: { languageCode: language },

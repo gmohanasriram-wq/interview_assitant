@@ -1,0 +1,1065 @@
+{
+  "startedAt": "2026-09-19T08:02:28.762Z",
+  "groundTruth": {
+    "text": "Thank you for that question. In my previous role I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers. Could you tell me how your team handles distributed transactions today?",
+    "chars": 361,
+    "finalQuestion": "distributed transactions"
+  },
+  "configs": {
+    "Baseline": [
+      {
+        "configType": "Baseline",
+        "trialIndex": 1,
+        "audioEndAtMs": 25708,
+        "firstVoiceActivityTime": 337,
+        "transcriptChunksCount": 2,
+        "firstTranscriptTime": 20985,
+        "lastTranscriptTime": 26258,
+        "generationCompleteCount": 1,
+        "firstGenerationCompleteMs": 28769,
+        "allGenerationCompleteMs": [
+          28769
+        ],
+        "turnCompleteCount": 1,
+        "firstTurnCompleteMs": 21867,
+        "turnCompleteReasons": [
+          "UNSPECIFIED"
+        ],
+        "interruptedCount": 1,
+        "interruptedTimes": [
+          21854
+        ],
+        "isPremature": false,
+        "audioSentAfterGenComplete": false,
+        "speechEndToGenCompleteLatency": 3061,
+        "finalCharCount": 346,
+        "hasFinalQuestion": true,
+        "isCompleteGroundTruth": true,
+        "hasMultipleGenCompletes": false,
+        "cleanedTranscriptPreview": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge w...",
+        "events": [
+          {
+            "t": 1,
+            "kind": "audio.start",
+            "detail": "start speech streaming"
+          },
+          {
+            "t": 337,
+            "kind": "voiceActivity",
+            "detail": ""
+          },
+          {
+            "t": 20985,
+            "kind": "transcript",
+            "detail": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers."
+          },
+          {
+            "t": 21854,
+            "kind": "interrupted",
+            "detail": "model interrupted"
+          },
+          {
+            "t": 21867,
+            "kind": "turnComplete",
+            "detail": "UNSPECIFIED"
+          },
+          {
+            "t": 25708,
+            "kind": "audio.end",
+            "detail": "speech finished"
+          },
+          {
+            "t": 26258,
+            "kind": "transcript",
+            "detail": "me how your team handles distributed transactions today?"
+          },
+          {
+            "t": 28769,
+            "kind": "generationComplete",
+            "detail": "generationComplete event"
+          },
+          {
+            "t": 30754,
+            "kind": "silence.end",
+            "detail": "silence tail finished"
+          }
+        ]
+      },
+      {
+        "configType": "Baseline",
+        "trialIndex": 2,
+        "audioEndAtMs": 25572,
+        "firstVoiceActivityTime": 319,
+        "transcriptChunksCount": 2,
+        "firstTranscriptTime": 20909,
+        "lastTranscriptTime": 26021,
+        "generationCompleteCount": 1,
+        "firstGenerationCompleteMs": 30417,
+        "allGenerationCompleteMs": [
+          30417
+        ],
+        "turnCompleteCount": 1,
+        "firstTurnCompleteMs": 21727,
+        "turnCompleteReasons": [
+          "UNSPECIFIED"
+        ],
+        "interruptedCount": 1,
+        "interruptedTimes": [
+          21719
+        ],
+        "isPremature": false,
+        "audioSentAfterGenComplete": false,
+        "speechEndToGenCompleteLatency": 4845,
+        "finalCharCount": 346,
+        "hasFinalQuestion": true,
+        "isCompleteGroundTruth": true,
+        "hasMultipleGenCompletes": false,
+        "cleanedTranscriptPreview": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge w...",
+        "events": [
+          {
+            "t": 0,
+            "kind": "audio.start",
+            "detail": "start speech streaming"
+          },
+          {
+            "t": 319,
+            "kind": "voiceActivity",
+            "detail": ""
+          },
+          {
+            "t": 20909,
+            "kind": "transcript",
+            "detail": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers."
+          },
+          {
+            "t": 21719,
+            "kind": "interrupted",
+            "detail": "model interrupted"
+          },
+          {
+            "t": 21727,
+            "kind": "turnComplete",
+            "detail": "UNSPECIFIED"
+          },
+          {
+            "t": 25572,
+            "kind": "audio.end",
+            "detail": "speech finished"
+          },
+          {
+            "t": 26021,
+            "kind": "transcript",
+            "detail": "me how your team handles distributed transactions today?"
+          },
+          {
+            "t": 30417,
+            "kind": "generationComplete",
+            "detail": "generationComplete event"
+          },
+          {
+            "t": 30622,
+            "kind": "silence.end",
+            "detail": "silence tail finished"
+          }
+        ]
+      },
+      {
+        "configType": "Baseline",
+        "trialIndex": 3,
+        "audioEndAtMs": 25621,
+        "firstVoiceActivityTime": 323,
+        "transcriptChunksCount": 2,
+        "firstTranscriptTime": 21076,
+        "lastTranscriptTime": 26098,
+        "generationCompleteCount": 1,
+        "firstGenerationCompleteMs": 28567,
+        "allGenerationCompleteMs": [
+          28567
+        ],
+        "turnCompleteCount": 1,
+        "firstTurnCompleteMs": 21936,
+        "turnCompleteReasons": [
+          "UNSPECIFIED"
+        ],
+        "interruptedCount": 1,
+        "interruptedTimes": [
+          21821
+        ],
+        "isPremature": false,
+        "audioSentAfterGenComplete": false,
+        "speechEndToGenCompleteLatency": 2946,
+        "finalCharCount": 346,
+        "hasFinalQuestion": true,
+        "isCompleteGroundTruth": true,
+        "hasMultipleGenCompletes": false,
+        "cleanedTranscriptPreview": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge w...",
+        "events": [
+          {
+            "t": 0,
+            "kind": "audio.start",
+            "detail": "start speech streaming"
+          },
+          {
+            "t": 323,
+            "kind": "voiceActivity",
+            "detail": ""
+          },
+          {
+            "t": 21076,
+            "kind": "transcript",
+            "detail": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers."
+          },
+          {
+            "t": 21821,
+            "kind": "interrupted",
+            "detail": "model interrupted"
+          },
+          {
+            "t": 21936,
+            "kind": "turnComplete",
+            "detail": "UNSPECIFIED"
+          },
+          {
+            "t": 25621,
+            "kind": "audio.end",
+            "detail": "speech finished"
+          },
+          {
+            "t": 26098,
+            "kind": "transcript",
+            "detail": "me how your team handles distributed transactions today?"
+          },
+          {
+            "t": 28567,
+            "kind": "generationComplete",
+            "detail": "generationComplete event"
+          },
+          {
+            "t": 30638,
+            "kind": "silence.end",
+            "detail": "silence tail finished"
+          }
+        ]
+      },
+      {
+        "configType": "Baseline",
+        "trialIndex": 4,
+        "audioEndAtMs": 25692,
+        "firstVoiceActivityTime": 392,
+        "transcriptChunksCount": 2,
+        "firstTranscriptTime": 21096,
+        "lastTranscriptTime": 26261,
+        "generationCompleteCount": 1,
+        "firstGenerationCompleteMs": 27467,
+        "allGenerationCompleteMs": [
+          27467
+        ],
+        "turnCompleteCount": 2,
+        "firstTurnCompleteMs": 21945,
+        "turnCompleteReasons": [
+          "UNSPECIFIED",
+          "UNSPECIFIED"
+        ],
+        "interruptedCount": 1,
+        "interruptedTimes": [
+          21919
+        ],
+        "isPremature": false,
+        "audioSentAfterGenComplete": false,
+        "speechEndToGenCompleteLatency": 1775,
+        "finalCharCount": 346,
+        "hasFinalQuestion": true,
+        "isCompleteGroundTruth": true,
+        "hasMultipleGenCompletes": false,
+        "cleanedTranscriptPreview": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge w...",
+        "events": [
+          {
+            "t": 0,
+            "kind": "audio.start",
+            "detail": "start speech streaming"
+          },
+          {
+            "t": 392,
+            "kind": "voiceActivity",
+            "detail": ""
+          },
+          {
+            "t": 21096,
+            "kind": "transcript",
+            "detail": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers."
+          },
+          {
+            "t": 21919,
+            "kind": "interrupted",
+            "detail": "model interrupted"
+          },
+          {
+            "t": 21945,
+            "kind": "turnComplete",
+            "detail": "UNSPECIFIED"
+          },
+          {
+            "t": 25692,
+            "kind": "audio.end",
+            "detail": "speech finished"
+          },
+          {
+            "t": 26261,
+            "kind": "transcript",
+            "detail": "me how your team handles distributed transactions today?"
+          },
+          {
+            "t": 27467,
+            "kind": "generationComplete",
+            "detail": "generationComplete event"
+          },
+          {
+            "t": 30751,
+            "kind": "silence.end",
+            "detail": "silence tail finished"
+          },
+          {
+            "t": 32472,
+            "kind": "turnComplete",
+            "detail": "UNSPECIFIED"
+          }
+        ]
+      },
+      {
+        "configType": "Baseline",
+        "trialIndex": 5,
+        "audioEndAtMs": 25626,
+        "firstVoiceActivityTime": 328,
+        "transcriptChunksCount": 2,
+        "firstTranscriptTime": 20879,
+        "lastTranscriptTime": 26086,
+        "generationCompleteCount": 2,
+        "firstGenerationCompleteMs": 20881,
+        "allGenerationCompleteMs": [
+          20881,
+          26087
+        ],
+        "turnCompleteCount": 2,
+        "firstTurnCompleteMs": 20882,
+        "turnCompleteReasons": [
+          "UNSPECIFIED",
+          "UNSPECIFIED"
+        ],
+        "interruptedCount": 0,
+        "interruptedTimes": [],
+        "isPremature": true,
+        "audioSentAfterGenComplete": true,
+        "speechEndToGenCompleteLatency": -4745,
+        "finalCharCount": 346,
+        "hasFinalQuestion": true,
+        "isCompleteGroundTruth": true,
+        "hasMultipleGenCompletes": true,
+        "cleanedTranscriptPreview": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge w...",
+        "events": [
+          {
+            "t": 0,
+            "kind": "audio.start",
+            "detail": "start speech streaming"
+          },
+          {
+            "t": 328,
+            "kind": "voiceActivity",
+            "detail": ""
+          },
+          {
+            "t": 20879,
+            "kind": "transcript",
+            "detail": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers."
+          },
+          {
+            "t": 20881,
+            "kind": "generationComplete",
+            "detail": "generationComplete event"
+          },
+          {
+            "t": 20882,
+            "kind": "turnComplete",
+            "detail": "UNSPECIFIED"
+          },
+          {
+            "t": 25626,
+            "kind": "audio.end",
+            "detail": "speech finished"
+          },
+          {
+            "t": 26086,
+            "kind": "transcript",
+            "detail": "me how your team handles distributed transactions today?"
+          },
+          {
+            "t": 26087,
+            "kind": "generationComplete",
+            "detail": "generationComplete event"
+          },
+          {
+            "t": 26087,
+            "kind": "turnComplete",
+            "detail": "UNSPECIFIED"
+          },
+          {
+            "t": 30669,
+            "kind": "silence.end",
+            "detail": "silence tail finished"
+          }
+        ]
+      }
+    ],
+    "Candidate_A": [
+      {
+        "configType": "Candidate_A",
+        "trialIndex": 1,
+        "audioEndAtMs": 25641,
+        "firstVoiceActivityTime": 448,
+        "transcriptChunksCount": 1,
+        "firstTranscriptTime": 26749,
+        "lastTranscriptTime": 26749,
+        "generationCompleteCount": 1,
+        "firstGenerationCompleteMs": 30158,
+        "allGenerationCompleteMs": [
+          30158
+        ],
+        "turnCompleteCount": 0,
+        "firstTurnCompleteMs": null,
+        "turnCompleteReasons": [],
+        "interruptedCount": 0,
+        "interruptedTimes": [],
+        "isPremature": false,
+        "audioSentAfterGenComplete": false,
+        "speechEndToGenCompleteLatency": 4517,
+        "finalCharCount": 362,
+        "hasFinalQuestion": true,
+        "isCompleteGroundTruth": true,
+        "hasMultipleGenCompletes": false,
+        "cleanedTranscriptPreview": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge w...",
+        "events": [
+          {
+            "t": 0,
+            "kind": "audio.start",
+            "detail": "start speech streaming"
+          },
+          {
+            "t": 448,
+            "kind": "voiceActivity",
+            "detail": ""
+          },
+          {
+            "t": 25641,
+            "kind": "audio.end",
+            "detail": "speech finished"
+          },
+          {
+            "t": 26749,
+            "kind": "transcript",
+            "detail": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers. Could you tell me how your team handles distributed transactions today?"
+          },
+          {
+            "t": 30158,
+            "kind": "generationComplete",
+            "detail": "generationComplete event"
+          },
+          {
+            "t": 30678,
+            "kind": "silence.end",
+            "detail": "silence tail finished"
+          }
+        ]
+      },
+      {
+        "configType": "Candidate_A",
+        "trialIndex": 2,
+        "audioEndAtMs": 25652,
+        "firstVoiceActivityTime": 342,
+        "transcriptChunksCount": 1,
+        "firstTranscriptTime": 26711,
+        "lastTranscriptTime": 26711,
+        "generationCompleteCount": 1,
+        "firstGenerationCompleteMs": 28392,
+        "allGenerationCompleteMs": [
+          28392
+        ],
+        "turnCompleteCount": 1,
+        "firstTurnCompleteMs": 33020,
+        "turnCompleteReasons": [
+          "UNSPECIFIED"
+        ],
+        "interruptedCount": 0,
+        "interruptedTimes": [],
+        "isPremature": false,
+        "audioSentAfterGenComplete": false,
+        "speechEndToGenCompleteLatency": 2740,
+        "finalCharCount": 362,
+        "hasFinalQuestion": true,
+        "isCompleteGroundTruth": true,
+        "hasMultipleGenCompletes": false,
+        "cleanedTranscriptPreview": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge w...",
+        "events": [
+          {
+            "t": 0,
+            "kind": "audio.start",
+            "detail": "start speech streaming"
+          },
+          {
+            "t": 342,
+            "kind": "voiceActivity",
+            "detail": ""
+          },
+          {
+            "t": 25652,
+            "kind": "audio.end",
+            "detail": "speech finished"
+          },
+          {
+            "t": 26711,
+            "kind": "transcript",
+            "detail": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers. Could you tell me how your team handles distributed transactions today?"
+          },
+          {
+            "t": 28392,
+            "kind": "generationComplete",
+            "detail": "generationComplete event"
+          },
+          {
+            "t": 30673,
+            "kind": "silence.end",
+            "detail": "silence tail finished"
+          },
+          {
+            "t": 33020,
+            "kind": "turnComplete",
+            "detail": "UNSPECIFIED"
+          }
+        ]
+      },
+      {
+        "configType": "Candidate_A",
+        "trialIndex": 3,
+        "audioEndAtMs": 25662,
+        "firstVoiceActivityTime": 339,
+        "transcriptChunksCount": 1,
+        "firstTranscriptTime": 26728,
+        "lastTranscriptTime": 26728,
+        "generationCompleteCount": 1,
+        "firstGenerationCompleteMs": 26728,
+        "allGenerationCompleteMs": [
+          26728
+        ],
+        "turnCompleteCount": 1,
+        "firstTurnCompleteMs": 26728,
+        "turnCompleteReasons": [
+          "UNSPECIFIED"
+        ],
+        "interruptedCount": 0,
+        "interruptedTimes": [],
+        "isPremature": false,
+        "audioSentAfterGenComplete": false,
+        "speechEndToGenCompleteLatency": 1066,
+        "finalCharCount": 362,
+        "hasFinalQuestion": true,
+        "isCompleteGroundTruth": true,
+        "hasMultipleGenCompletes": false,
+        "cleanedTranscriptPreview": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge w...",
+        "events": [
+          {
+            "t": 0,
+            "kind": "audio.start",
+            "detail": "start speech streaming"
+          },
+          {
+            "t": 339,
+            "kind": "voiceActivity",
+            "detail": ""
+          },
+          {
+            "t": 25662,
+            "kind": "audio.end",
+            "detail": "speech finished"
+          },
+          {
+            "t": 26728,
+            "kind": "transcript",
+            "detail": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers. Could you tell me how your team handles distributed transactions today?"
+          },
+          {
+            "t": 26728,
+            "kind": "generationComplete",
+            "detail": "generationComplete event"
+          },
+          {
+            "t": 26728,
+            "kind": "turnComplete",
+            "detail": "UNSPECIFIED"
+          },
+          {
+            "t": 30718,
+            "kind": "silence.end",
+            "detail": "silence tail finished"
+          }
+        ]
+      },
+      {
+        "configType": "Candidate_A",
+        "trialIndex": 4,
+        "audioEndAtMs": 25673,
+        "firstVoiceActivityTime": 341,
+        "transcriptChunksCount": 1,
+        "firstTranscriptTime": 26685,
+        "lastTranscriptTime": 26685,
+        "generationCompleteCount": 1,
+        "firstGenerationCompleteMs": 26688,
+        "allGenerationCompleteMs": [
+          26688
+        ],
+        "turnCompleteCount": 1,
+        "firstTurnCompleteMs": 26689,
+        "turnCompleteReasons": [
+          "UNSPECIFIED"
+        ],
+        "interruptedCount": 0,
+        "interruptedTimes": [],
+        "isPremature": false,
+        "audioSentAfterGenComplete": false,
+        "speechEndToGenCompleteLatency": 1015,
+        "finalCharCount": 362,
+        "hasFinalQuestion": true,
+        "isCompleteGroundTruth": true,
+        "hasMultipleGenCompletes": false,
+        "cleanedTranscriptPreview": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge w...",
+        "events": [
+          {
+            "t": 0,
+            "kind": "audio.start",
+            "detail": "start speech streaming"
+          },
+          {
+            "t": 341,
+            "kind": "voiceActivity",
+            "detail": ""
+          },
+          {
+            "t": 25673,
+            "kind": "audio.end",
+            "detail": "speech finished"
+          },
+          {
+            "t": 26685,
+            "kind": "transcript",
+            "detail": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers. Could you tell me how your team handles distributed transactions today?"
+          },
+          {
+            "t": 26688,
+            "kind": "generationComplete",
+            "detail": "generationComplete event"
+          },
+          {
+            "t": 26689,
+            "kind": "turnComplete",
+            "detail": "UNSPECIFIED"
+          },
+          {
+            "t": 30701,
+            "kind": "silence.end",
+            "detail": "silence tail finished"
+          }
+        ]
+      },
+      {
+        "configType": "Candidate_A",
+        "trialIndex": 5,
+        "audioEndAtMs": 25645,
+        "firstVoiceActivityTime": 390,
+        "transcriptChunksCount": 1,
+        "firstTranscriptTime": 26722,
+        "lastTranscriptTime": 26722,
+        "generationCompleteCount": 1,
+        "firstGenerationCompleteMs": 28276,
+        "allGenerationCompleteMs": [
+          28276
+        ],
+        "turnCompleteCount": 0,
+        "firstTurnCompleteMs": null,
+        "turnCompleteReasons": [],
+        "interruptedCount": 0,
+        "interruptedTimes": [],
+        "isPremature": false,
+        "audioSentAfterGenComplete": false,
+        "speechEndToGenCompleteLatency": 2631,
+        "finalCharCount": 362,
+        "hasFinalQuestion": true,
+        "isCompleteGroundTruth": true,
+        "hasMultipleGenCompletes": false,
+        "cleanedTranscriptPreview": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge w...",
+        "events": [
+          {
+            "t": 0,
+            "kind": "audio.start",
+            "detail": "start speech streaming"
+          },
+          {
+            "t": 390,
+            "kind": "voiceActivity",
+            "detail": ""
+          },
+          {
+            "t": 25645,
+            "kind": "audio.end",
+            "detail": "speech finished"
+          },
+          {
+            "t": 26722,
+            "kind": "transcript",
+            "detail": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers. Could you tell me how your team handles distributed transactions today?"
+          },
+          {
+            "t": 28276,
+            "kind": "generationComplete",
+            "detail": "generationComplete event"
+          },
+          {
+            "t": 30662,
+            "kind": "silence.end",
+            "detail": "silence tail finished"
+          }
+        ]
+      }
+    ],
+    "Candidate_B": [
+      {
+        "configType": "Candidate_B",
+        "trialIndex": 1,
+        "audioEndAtMs": 25651,
+        "firstVoiceActivityTime": 341,
+        "transcriptChunksCount": 1,
+        "firstTranscriptTime": 27153,
+        "lastTranscriptTime": 27153,
+        "generationCompleteCount": 1,
+        "firstGenerationCompleteMs": 27500,
+        "allGenerationCompleteMs": [
+          27500
+        ],
+        "turnCompleteCount": 1,
+        "firstTurnCompleteMs": 32443,
+        "turnCompleteReasons": [
+          "UNSPECIFIED"
+        ],
+        "interruptedCount": 0,
+        "interruptedTimes": [],
+        "isPremature": false,
+        "audioSentAfterGenComplete": false,
+        "speechEndToGenCompleteLatency": 1849,
+        "finalCharCount": 362,
+        "hasFinalQuestion": true,
+        "isCompleteGroundTruth": true,
+        "hasMultipleGenCompletes": false,
+        "cleanedTranscriptPreview": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge w...",
+        "events": [
+          {
+            "t": 0,
+            "kind": "audio.start",
+            "detail": "start speech streaming"
+          },
+          {
+            "t": 341,
+            "kind": "voiceActivity",
+            "detail": ""
+          },
+          {
+            "t": 25651,
+            "kind": "audio.end",
+            "detail": "speech finished"
+          },
+          {
+            "t": 27153,
+            "kind": "transcript",
+            "detail": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers. Could you tell me how your team handles distributed transactions today?"
+          },
+          {
+            "t": 27500,
+            "kind": "generationComplete",
+            "detail": "generationComplete event"
+          },
+          {
+            "t": 30696,
+            "kind": "silence.end",
+            "detail": "silence tail finished"
+          },
+          {
+            "t": 32443,
+            "kind": "turnComplete",
+            "detail": "UNSPECIFIED"
+          }
+        ]
+      },
+      {
+        "configType": "Candidate_B",
+        "trialIndex": 2,
+        "audioEndAtMs": 25671,
+        "firstVoiceActivityTime": 326,
+        "transcriptChunksCount": 1,
+        "firstTranscriptTime": 27220,
+        "lastTranscriptTime": 27220,
+        "generationCompleteCount": 1,
+        "firstGenerationCompleteMs": 29477,
+        "allGenerationCompleteMs": [
+          29477
+        ],
+        "turnCompleteCount": 0,
+        "firstTurnCompleteMs": null,
+        "turnCompleteReasons": [],
+        "interruptedCount": 0,
+        "interruptedTimes": [],
+        "isPremature": false,
+        "audioSentAfterGenComplete": false,
+        "speechEndToGenCompleteLatency": 3806,
+        "finalCharCount": 362,
+        "hasFinalQuestion": true,
+        "isCompleteGroundTruth": true,
+        "hasMultipleGenCompletes": false,
+        "cleanedTranscriptPreview": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge w...",
+        "events": [
+          {
+            "t": 0,
+            "kind": "audio.start",
+            "detail": "start speech streaming"
+          },
+          {
+            "t": 326,
+            "kind": "voiceActivity",
+            "detail": ""
+          },
+          {
+            "t": 25671,
+            "kind": "audio.end",
+            "detail": "speech finished"
+          },
+          {
+            "t": 27220,
+            "kind": "transcript",
+            "detail": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers. Could you tell me how your team handles distributed transactions today?"
+          },
+          {
+            "t": 29477,
+            "kind": "generationComplete",
+            "detail": "generationComplete event"
+          },
+          {
+            "t": 30781,
+            "kind": "silence.end",
+            "detail": "silence tail finished"
+          }
+        ]
+      },
+      {
+        "configType": "Candidate_B",
+        "trialIndex": 3,
+        "audioEndAtMs": 25649,
+        "firstVoiceActivityTime": 338,
+        "transcriptChunksCount": 1,
+        "firstTranscriptTime": 27331,
+        "lastTranscriptTime": 27331,
+        "generationCompleteCount": 1,
+        "firstGenerationCompleteMs": 29995,
+        "allGenerationCompleteMs": [
+          29995
+        ],
+        "turnCompleteCount": 0,
+        "firstTurnCompleteMs": null,
+        "turnCompleteReasons": [],
+        "interruptedCount": 0,
+        "interruptedTimes": [],
+        "isPremature": false,
+        "audioSentAfterGenComplete": false,
+        "speechEndToGenCompleteLatency": 4346,
+        "finalCharCount": 362,
+        "hasFinalQuestion": true,
+        "isCompleteGroundTruth": true,
+        "hasMultipleGenCompletes": false,
+        "cleanedTranscriptPreview": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge w...",
+        "events": [
+          {
+            "t": 0,
+            "kind": "audio.start",
+            "detail": "start speech streaming"
+          },
+          {
+            "t": 338,
+            "kind": "voiceActivity",
+            "detail": ""
+          },
+          {
+            "t": 25649,
+            "kind": "audio.end",
+            "detail": "speech finished"
+          },
+          {
+            "t": 27331,
+            "kind": "transcript",
+            "detail": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers. Could you tell me how your team handles distributed transactions today?"
+          },
+          {
+            "t": 29995,
+            "kind": "generationComplete",
+            "detail": "generationComplete event"
+          },
+          {
+            "t": 30663,
+            "kind": "silence.end",
+            "detail": "silence tail finished"
+          }
+        ]
+      },
+      {
+        "configType": "Candidate_B",
+        "trialIndex": 4,
+        "audioEndAtMs": 25646,
+        "firstVoiceActivityTime": 641,
+        "transcriptChunksCount": 1,
+        "firstTranscriptTime": 27367,
+        "lastTranscriptTime": 27367,
+        "generationCompleteCount": 1,
+        "firstGenerationCompleteMs": 30307,
+        "allGenerationCompleteMs": [
+          30307
+        ],
+        "turnCompleteCount": 0,
+        "firstTurnCompleteMs": null,
+        "turnCompleteReasons": [],
+        "interruptedCount": 0,
+        "interruptedTimes": [],
+        "isPremature": false,
+        "audioSentAfterGenComplete": false,
+        "speechEndToGenCompleteLatency": 4661,
+        "finalCharCount": 362,
+        "hasFinalQuestion": true,
+        "isCompleteGroundTruth": true,
+        "hasMultipleGenCompletes": false,
+        "cleanedTranscriptPreview": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge w...",
+        "events": [
+          {
+            "t": 1,
+            "kind": "audio.start",
+            "detail": "start speech streaming"
+          },
+          {
+            "t": 641,
+            "kind": "voiceActivity",
+            "detail": ""
+          },
+          {
+            "t": 25646,
+            "kind": "audio.end",
+            "detail": "speech finished"
+          },
+          {
+            "t": 27367,
+            "kind": "transcript",
+            "detail": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers. Could you tell me how your team handles distributed transactions today?"
+          },
+          {
+            "t": 30307,
+            "kind": "generationComplete",
+            "detail": "generationComplete event"
+          },
+          {
+            "t": 30733,
+            "kind": "silence.end",
+            "detail": "silence tail finished"
+          }
+        ]
+      },
+      {
+        "configType": "Candidate_B",
+        "trialIndex": 5,
+        "audioEndAtMs": 25714,
+        "firstVoiceActivityTime": 345,
+        "transcriptChunksCount": 1,
+        "firstTranscriptTime": 27264,
+        "lastTranscriptTime": 27264,
+        "generationCompleteCount": 1,
+        "firstGenerationCompleteMs": 32235,
+        "allGenerationCompleteMs": [
+          32235
+        ],
+        "turnCompleteCount": 0,
+        "firstTurnCompleteMs": null,
+        "turnCompleteReasons": [],
+        "interruptedCount": 0,
+        "interruptedTimes": [],
+        "isPremature": false,
+        "audioSentAfterGenComplete": false,
+        "speechEndToGenCompleteLatency": 6521,
+        "finalCharCount": 362,
+        "hasFinalQuestion": true,
+        "isCompleteGroundTruth": true,
+        "hasMultipleGenCompletes": false,
+        "cleanedTranscriptPreview": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge w...",
+        "events": [
+          {
+            "t": 0,
+            "kind": "audio.start",
+            "detail": "start speech streaming"
+          },
+          {
+            "t": 345,
+            "kind": "voiceActivity",
+            "detail": ""
+          },
+          {
+            "t": 25714,
+            "kind": "audio.end",
+            "detail": "speech finished"
+          },
+          {
+            "t": 27264,
+            "kind": "transcript",
+            "detail": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers. Could you tell me how your team handles distributed transactions today?"
+          },
+          {
+            "t": 30765,
+            "kind": "silence.end",
+            "detail": "silence tail finished"
+          },
+          {
+            "t": 32235,
+            "kind": "generationComplete",
+            "detail": "generationComplete event"
+          }
+        ]
+      }
+    ]
+  },
+  "summary": {
+    "Baseline": {
+      "totalTrials": 5,
+      "prematureCount": 1,
+      "prematureRatePct": "20.0%",
+      "questionCapturedCount": 5,
+      "questionCapturedRatePct": "100.0%",
+      "avgFinalChars": "346.0",
+      "avgLatencyPostSpeechMs": "3157"
+    },
+    "Candidate_A": {
+      "totalTrials": 5,
+      "prematureCount": 0,
+      "prematureRatePct": "0.0%",
+      "questionCapturedCount": 5,
+      "questionCapturedRatePct": "100.0%",
+      "avgFinalChars": "362.0",
+      "avgLatencyPostSpeechMs": "2394"
+    },
+    "Candidate_B": {
+      "totalTrials": 5,
+      "prematureCount": 0,
+      "prematureRatePct": "0.0%",
+      "questionCapturedCount": 5,
+      "questionCapturedRatePct": "100.0%",
+      "avgFinalChars": "362.0",
+      "avgLatencyPostSpeechMs": "4237"
+    }
+  },
+  "completedAt": "2026-09-19T08:11:29.682Z"
+}

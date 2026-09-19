@@ -1,0 +1,555 @@
+{
+  "timestamp": "2026-09-19T10:53:12.060Z",
+  "results": [
+    {
+      "id": "T1_Q1_NORMAL",
+      "label": "Question 1: Hello, thanks for joining...",
+      "audioDurationMs": 7500,
+      "tSpeechStart": 1789815107295,
+      "tSpeechEnd": 1789815115486,
+      "tFirstVoiceActivity": 1789815107623,
+      "tFirstTranscript": 1789815116703,
+      "tLastTranscript": 1789815116703,
+      "tGenerationComplete": 1789815116705,
+      "tTurnComplete": 1789815116721,
+      "tDispatchTranscript": 1789815116705,
+      "tGenerateAnswer": 1789815116705,
+      "tFifoAcquired": 1789815116705,
+      "tGroqStart": 1789815116705,
+      "tGroqFirstToken": 1789815118051,
+      "tGroqEnd": 1789815118169,
+      "tUiFirstRender": 1789815118052,
+      "transcript": "Question one. Hello, thanks for joining today. Could you please introduce yourself and tell me about your background?",
+      "transcriptChunks": [
+        {
+          "t": 9408,
+          "text": "Question one. Hello, thanks for joining today. Could you please introduce yourself and tell me about your background?"
+        }
+      ],
+      "isSuspicious": false,
+      "fragmentGraceHeldMs": 0,
+      "fifoWaitMs": 0,
+      "groqTtftMs": 1345,
+      "groqTotalMs": 1463,
+      "speechEndToGenCompleteMs": 1219,
+      "lastTranscriptToGenCompleteMs": 2,
+      "speechEndToLastTranscriptMs": 1217,
+      "speechEndToUiFirstRenderMs": 2566,
+      "events": [
+        {
+          "t": 0,
+          "kind": "speech.start",
+          "detail": "Streaming 7500ms"
+        },
+        {
+          "t": 328,
+          "kind": "voiceActivity",
+          "detail": ""
+        },
+        {
+          "t": 8191,
+          "kind": "speech.end",
+          "detail": "User finished speaking"
+        },
+        {
+          "t": 9408,
+          "kind": "inputTranscript",
+          "detail": "Question one. Hello, thanks for joining "
+        },
+        {
+          "t": 9408,
+          "kind": "voiceActivity",
+          "detail": ""
+        },
+        {
+          "t": 9410,
+          "kind": "generationComplete",
+          "detail": "TRIGGER"
+        },
+        {
+          "t": 9410,
+          "kind": "dispatchTranscript",
+          "detail": "Question one. Hello, thanks for joining "
+        },
+        {
+          "t": 9410,
+          "kind": "fragmentGuard.pass",
+          "detail": "Bypassed guard (substantive query)"
+        },
+        {
+          "t": 9410,
+          "kind": "generateAnswer",
+          "detail": "called"
+        },
+        {
+          "t": 9410,
+          "kind": "fifo.acquired",
+          "detail": "wait: 0ms"
+        },
+        {
+          "t": 9410,
+          "kind": "groq.start",
+          "detail": "Invoking Groq API"
+        },
+        {
+          "t": 9426,
+          "kind": "turnComplete",
+          "detail": ""
+        },
+        {
+          "t": 10874,
+          "kind": "groq.firstToken",
+          "detail": "TTFT: 1345ms"
+        },
+        {
+          "t": 10874,
+          "kind": "groq.end",
+          "detail": "Total: 1463ms"
+        },
+        {
+          "t": 10874,
+          "kind": "ui.firstRender",
+          "detail": "Visible in UI"
+        }
+      ]
+    },
+    {
+      "id": "T2_Q2_NORMAL",
+      "label": "Question 2: Can you walk me through one project...",
+      "audioDurationMs": 8000,
+      "tSpeechStart": 1789815120088,
+      "tSpeechEnd": 1789815128838,
+      "tFirstVoiceActivity": 1789815120433,
+      "tFirstTranscript": 1789815130901,
+      "tLastTranscript": 1789815130901,
+      "tGenerationComplete": 1789815135757,
+      "tTurnComplete": null,
+      "tDispatchTranscript": 1789815135757,
+      "tGenerateAnswer": 1789815135757,
+      "tFifoAcquired": 1789815135757,
+      "tGroqStart": 1789815135757,
+      "tGroqFirstToken": 1789815136990,
+      "tGroqEnd": 1789815137064,
+      "tUiFirstRender": 1789815136991,
+      "transcript": "Question two. Can you walk me through one project that you're most proud of and explain your specific contribution? Ques",
+      "transcriptChunks": [
+        {
+          "t": 10813,
+          "text": "Question two. Can you walk me through one project that you're most proud of and explain your specific contribution? Ques"
+        }
+      ],
+      "isSuspicious": false,
+      "fragmentGraceHeldMs": 0,
+      "fifoWaitMs": 0,
+      "groqTtftMs": 1233,
+      "groqTotalMs": 1307,
+      "speechEndToGenCompleteMs": 6919,
+      "lastTranscriptToGenCompleteMs": 4856,
+      "speechEndToLastTranscriptMs": 2063,
+      "speechEndToUiFirstRenderMs": 8153,
+      "events": [
+        {
+          "t": 0,
+          "kind": "speech.start",
+          "detail": "Streaming 8000ms"
+        },
+        {
+          "t": 345,
+          "kind": "voiceActivity",
+          "detail": ""
+        },
+        {
+          "t": 8750,
+          "kind": "speech.end",
+          "detail": "User finished speaking"
+        },
+        {
+          "t": 10813,
+          "kind": "inputTranscript",
+          "detail": "Question two. Can you walk me through on"
+        },
+        {
+          "t": 10813,
+          "kind": "voiceActivity",
+          "detail": ""
+        },
+        {
+          "t": 15669,
+          "kind": "generationComplete",
+          "detail": "TRIGGER"
+        },
+        {
+          "t": 15669,
+          "kind": "dispatchTranscript",
+          "detail": "Question two. Can you walk me through on"
+        },
+        {
+          "t": 15669,
+          "kind": "fragmentGuard.pass",
+          "detail": "Bypassed guard (substantive query)"
+        },
+        {
+          "t": 15669,
+          "kind": "generateAnswer",
+          "detail": "called"
+        },
+        {
+          "t": 15669,
+          "kind": "fifo.acquired",
+          "detail": "wait: 0ms"
+        },
+        {
+          "t": 15669,
+          "kind": "groq.start",
+          "detail": "Invoking Groq API"
+        },
+        {
+          "t": 16976,
+          "kind": "groq.firstToken",
+          "detail": "TTFT: 1233ms"
+        },
+        {
+          "t": 16976,
+          "kind": "groq.end",
+          "detail": "Total: 1307ms"
+        },
+        {
+          "t": 16976,
+          "kind": "ui.firstRender",
+          "detail": "Visible in UI"
+        }
+      ]
+    },
+    {
+      "id": "T3_Q3_NORMAL",
+      "label": "Question 3: What do you enjoy most about Python...",
+      "audioDurationMs": 7000,
+      "tSpeechStart": 1789815138819,
+      "tSpeechEnd": 1789815146491,
+      "tFirstVoiceActivity": 1789815139815,
+      "tFirstTranscript": 1789815148250,
+      "tLastTranscript": 1789815148250,
+      "tGenerationComplete": 1789815148251,
+      "tTurnComplete": 1789815148253,
+      "tDispatchTranscript": 1789815148251,
+      "tGenerateAnswer": 1789815148251,
+      "tFifoAcquired": 1789815148251,
+      "tGroqStart": 1789815148251,
+      "tGroqFirstToken": 1789815149125,
+      "tGroqEnd": 1789815149231,
+      "tUiFirstRender": 1789815149126,
+      "transcript": "I noticed you've worked with Python. What do you enjoy most about Python compared to other programming languages?",
+      "transcriptChunks": [
+        {
+          "t": 9431,
+          "text": "I noticed you've worked with Python. What do you enjoy most about Python compared to other programming languages?"
+        }
+      ],
+      "isSuspicious": false,
+      "fragmentGraceHeldMs": 0,
+      "fifoWaitMs": 0,
+      "groqTtftMs": 874,
+      "groqTotalMs": 980,
+      "speechEndToGenCompleteMs": 1760,
+      "lastTranscriptToGenCompleteMs": 1,
+      "speechEndToLastTranscriptMs": 1759,
+      "speechEndToUiFirstRenderMs": 2635,
+      "events": [
+        {
+          "t": 0,
+          "kind": "speech.start",
+          "detail": "Streaming 7000ms"
+        },
+        {
+          "t": 996,
+          "kind": "voiceActivity",
+          "detail": ""
+        },
+        {
+          "t": 7672,
+          "kind": "speech.end",
+          "detail": "User finished speaking"
+        },
+        {
+          "t": 9432,
+          "kind": "inputTranscript",
+          "detail": "I noticed you've worked with Python. Wha"
+        },
+        {
+          "t": 9432,
+          "kind": "voiceActivity",
+          "detail": ""
+        },
+        {
+          "t": 9432,
+          "kind": "generationComplete",
+          "detail": "TRIGGER"
+        },
+        {
+          "t": 9432,
+          "kind": "dispatchTranscript",
+          "detail": "I noticed you've worked with Python. Wha"
+        },
+        {
+          "t": 9432,
+          "kind": "fragmentGuard.pass",
+          "detail": "Bypassed guard (substantive query)"
+        },
+        {
+          "t": 9432,
+          "kind": "generateAnswer",
+          "detail": "called"
+        },
+        {
+          "t": 9432,
+          "kind": "fifo.acquired",
+          "detail": "wait: 0ms"
+        },
+        {
+          "t": 9432,
+          "kind": "groq.start",
+          "detail": "Invoking Groq API"
+        },
+        {
+          "t": 9434,
+          "kind": "turnComplete",
+          "detail": ""
+        },
+        {
+          "t": 10412,
+          "kind": "groq.firstToken",
+          "detail": "TTFT: 874ms"
+        },
+        {
+          "t": 10412,
+          "kind": "groq.end",
+          "detail": "Total: 980ms"
+        },
+        {
+          "t": 10412,
+          "kind": "ui.firstRender",
+          "detail": "Visible in UI"
+        }
+      ]
+    },
+    {
+      "id": "T4_ELEVENLABS",
+      "label": "ElevenLabs Q1 (Roger voice cut)",
+      "audioDurationMs": 5500,
+      "tSpeechStart": 1789815151268,
+      "tSpeechEnd": 1789815157297,
+      "tFirstVoiceActivity": 1789815152125,
+      "tFirstTranscript": 1789815159011,
+      "tLastTranscript": 1789815159011,
+      "tGenerationComplete": 1789815159015,
+      "tTurnComplete": 1789815159015,
+      "tDispatchTranscript": 1789815159015,
+      "tGenerateAnswer": 1789815159015,
+      "tFifoAcquired": 1789815159015,
+      "tGroqStart": 1789815159015,
+      "tGroqFirstToken": 1789815159970,
+      "tGroqEnd": 1789815160237,
+      "tUiFirstRender": 1789815159971,
+      "transcript": "Hello, thanks for joining today. Could you please introduce yourself and tell me about your background?",
+      "transcriptChunks": [
+        {
+          "t": 7743,
+          "text": "Hello, thanks for joining today. Could you please introduce yourself and tell me about your background?"
+        }
+      ],
+      "isSuspicious": false,
+      "fragmentGraceHeldMs": 0,
+      "fifoWaitMs": 0,
+      "groqTtftMs": 955,
+      "groqTotalMs": 1222,
+      "speechEndToGenCompleteMs": 1718,
+      "lastTranscriptToGenCompleteMs": 4,
+      "speechEndToLastTranscriptMs": 1714,
+      "speechEndToUiFirstRenderMs": 2674,
+      "events": [
+        {
+          "t": 0,
+          "kind": "speech.start",
+          "detail": "Streaming 5500ms"
+        },
+        {
+          "t": 857,
+          "kind": "voiceActivity",
+          "detail": ""
+        },
+        {
+          "t": 6029,
+          "kind": "speech.end",
+          "detail": "User finished speaking"
+        },
+        {
+          "t": 7743,
+          "kind": "inputTranscript",
+          "detail": "Hello, thanks for joining today. Could y"
+        },
+        {
+          "t": 7745,
+          "kind": "voiceActivity",
+          "detail": ""
+        },
+        {
+          "t": 7747,
+          "kind": "generationComplete",
+          "detail": "TRIGGER"
+        },
+        {
+          "t": 7747,
+          "kind": "turnComplete",
+          "detail": ""
+        },
+        {
+          "t": 7747,
+          "kind": "dispatchTranscript",
+          "detail": "Hello, thanks for joining today. Could y"
+        },
+        {
+          "t": 7747,
+          "kind": "fragmentGuard.pass",
+          "detail": "Bypassed guard (substantive query)"
+        },
+        {
+          "t": 7747,
+          "kind": "generateAnswer",
+          "detail": "called"
+        },
+        {
+          "t": 7747,
+          "kind": "fifo.acquired",
+          "detail": "wait: 0ms"
+        },
+        {
+          "t": 7747,
+          "kind": "groq.start",
+          "detail": "Invoking Groq API"
+        },
+        {
+          "t": 8969,
+          "kind": "groq.firstToken",
+          "detail": "TTFT: 955ms"
+        },
+        {
+          "t": 8969,
+          "kind": "groq.end",
+          "detail": "Total: 1222ms"
+        },
+        {
+          "t": 8969,
+          "kind": "ui.firstRender",
+          "detail": "Visible in UI"
+        }
+      ]
+    },
+    {
+      "id": "T5_PAUSE_LONG",
+      "label": "Utterance with 800ms natural pause",
+      "audioDurationMs": 23325,
+      "tSpeechStart": 1789815161963,
+      "tSpeechEnd": 1789815187614,
+      "tFirstVoiceActivity": 1789815162304,
+      "tFirstTranscript": 1789815188697,
+      "tLastTranscript": 1789815188697,
+      "tGenerationComplete": 1789815189943,
+      "tTurnComplete": null,
+      "tDispatchTranscript": 1789815189943,
+      "tGenerateAnswer": 1789815189943,
+      "tFifoAcquired": 1789815189943,
+      "tGroqStart": 1789815189943,
+      "tGroqFirstToken": 1789815191054,
+      "tGroqEnd": 1789815191058,
+      "tUiFirstRender": 1789815191055,
+      "transcript": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers. Could you tell me how your team handles distributed transactions today?",
+      "transcriptChunks": [
+        {
+          "t": 26734,
+          "text": "Thank you for that question. In my previous role, I led a team that migrated a monolithic service to a microservice architecture. The main challenge was maintaining data consistency across service boundaries. We addressed it by introducing an event-driven pattern with idempotent consumers. Could you tell me how your team handles distributed transactions today?"
+        }
+      ],
+      "isSuspicious": false,
+      "fragmentGraceHeldMs": 0,
+      "fifoWaitMs": 0,
+      "groqTtftMs": 1111,
+      "groqTotalMs": 1115,
+      "speechEndToGenCompleteMs": 2329,
+      "lastTranscriptToGenCompleteMs": 1246,
+      "speechEndToLastTranscriptMs": 1083,
+      "speechEndToUiFirstRenderMs": 3441,
+      "events": [
+        {
+          "t": 0,
+          "kind": "speech.start",
+          "detail": "Streaming 23325ms"
+        },
+        {
+          "t": 341,
+          "kind": "voiceActivity",
+          "detail": ""
+        },
+        {
+          "t": 25651,
+          "kind": "speech.end",
+          "detail": "User finished speaking"
+        },
+        {
+          "t": 26734,
+          "kind": "inputTranscript",
+          "detail": "Thank you for that question. In my previ"
+        },
+        {
+          "t": 26734,
+          "kind": "voiceActivity",
+          "detail": ""
+        },
+        {
+          "t": 27980,
+          "kind": "generationComplete",
+          "detail": "TRIGGER"
+        },
+        {
+          "t": 27980,
+          "kind": "dispatchTranscript",
+          "detail": "Thank you for that question. In my previ"
+        },
+        {
+          "t": 27980,
+          "kind": "fragmentGuard.pass",
+          "detail": "Bypassed guard (substantive query)"
+        },
+        {
+          "t": 27980,
+          "kind": "generateAnswer",
+          "detail": "called"
+        },
+        {
+          "t": 27980,
+          "kind": "fifo.acquired",
+          "detail": "wait: 0ms"
+        },
+        {
+          "t": 27980,
+          "kind": "groq.start",
+          "detail": "Invoking Groq API"
+        },
+        {
+          "t": 29096,
+          "kind": "groq.firstToken",
+          "detail": "TTFT: 1111ms"
+        },
+        {
+          "t": 29096,
+          "kind": "groq.end",
+          "detail": "Total: 1115ms"
+        },
+        {
+          "t": 29096,
+          "kind": "ui.firstRender",
+          "detail": "Visible in UI"
+        }
+      ]
+    }
+  ]
+}
