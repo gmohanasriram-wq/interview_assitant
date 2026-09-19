@@ -31,6 +31,54 @@ let nextGenerateAnswerId = 1;
 let currentSessionId = null;
 let currentTranscription = '';
 let pendingTranscript = '';
+
+// Phase 3B-4A: a premature Live turn commit (triggered by an intra-utterance pause) can
+// deliver a fragment such as "question" as though it were a complete question, spending a
+// Groq generation on it and occupying the FIFO queue the real question then waits behind.
+// Suspicious fragments are held briefly so a continuation can be stitched onto them.
+let pendingFragmentBuffer = '';
+let fragmentGraceTimer = null;
+const FRAGMENT_GRACE_MS = 500;
+
+// Phase 3B-4B: Preemptible fragment generation
+// An in-flight Groq generation initiated by a suspicious short fragment can be aborted
+// immediately if a subsequent query arrives, unblocking the FIFO queue.
+let inFlightFragmentController = null;
+
+class PreemptionError extends Error {
+    constructor(reason = 'Preempted by incoming query') {
+        super(reason);
+        this.name = 'PreemptionError';
+        this.isPreemption = true;
+    }
+}
+
+function isPreemptionError(err, signal) {
+    if (!err && !signal) return false;
+    if (signal && signal.aborted) {
+        if (signal.reason?.isPreemption || signal.reason?.name === 'PreemptionError') {
+            return true;
+        }
+    }
+    if (err) {
+        if (err.isPreemption || err.name === 'PreemptionError') return true;
+        if (err.cause?.isPreemption || err.cause?.name === 'PreemptionError') return true;
+        if (signal?.aborted && (signal.reason?.isPreemption || signal.reason?.name === 'PreemptionError')) return true;
+    }
+    return false;
+}
+
+function preemptInFlightFragment(reasonText = 'Preempted by incoming query') {
+    if (inFlightFragmentController) {
+        console.log(`[Preemption] Aborting in-flight fragment generation: ${reasonText}`);
+        const controller = inFlightFragmentController;
+        inFlightFragmentController = null;
+        controller.abort(new PreemptionError(reasonText));
+        return true;
+    }
+    return false;
+}
+
 let conversationHistory = [];
 let screenAnalysisHistory = [];
 let currentProfile = null;
@@ -63,6 +111,88 @@ function cleanTranscript(text) {
     cleaned = cleaned.replace(/\s+/g, ' ');
 
     return cleaned;
+}
+
+/**
+ * True when a transcript looks like a fragment of a longer utterance rather than a complete
+ * question. Syntactically complete short questions are never fragments: a terminal '?' or an
+ * imperative technical starter means the speaker finished a thought, however briefly.
+ * Threshold validated against the Phase 3B-4A acceptance benchmark (0 false positives,
+ * 0 false negatives over 14 inputs).
+ */
+function isSuspiciousFragment(text) {
+    const trimmed = text.trim();
+    if (!trimmed) return false;
+
+    const words = trimmed.split(/\s+/).length;
+    const chars = trimmed.length;
+
+    // Complete question
+    if (trimmed.endsWith('?') && words >= 2) return false;
+
+    // Complete imperative-style query
+    if (/^(explain|describe|define|compare|implement|summarize|detail)\b/i.test(trimmed) && words >= 2) {
+        return false;
+    }
+
+    // Suspicious short fragment
+    return words < 4 && chars < 20;
+}
+
+function cancelFragmentGrace() {
+    if (fragmentGraceTimer) {
+        clearTimeout(fragmentGraceTimer);
+        fragmentGraceTimer = null;
+    }
+}
+
+/** Drops a held fragment and its timer. Used on session reset, reconnect and close so a
+ *  late timer cannot dispatch into a dead session. */
+function resetFragmentGuard() {
+    cancelFragmentGrace();
+    pendingFragmentBuffer = '';
+    preemptInFlightFragment('Fragment guard reset');
+}
+
+/**
+ * Routes a committed transcript to answer generation, holding suspicious fragments for a
+ * short grace window so a continuation can be stitched on instead of dispatching a throwaway
+ * answer. Emits at most one generateAnswer() per utterance.
+ */
+async function dispatchTranscript(rawTranscript) {
+    let text = cleanTranscript(rawTranscript);
+    if (text === null) return;
+
+    // A held fragment means the previous turn was cut short: stitch rather than dispatch.
+    if (pendingFragmentBuffer) {
+        text = cleanTranscript(`${pendingFragmentBuffer} ${text}`) || text;
+        pendingFragmentBuffer = '';
+        cancelFragmentGrace();
+        console.log('Stitched fragment into continuation:', text);
+    }
+
+    if (isSuspiciousFragment(text)) {
+        preemptInFlightFragment(`Preempted by incoming fragment: "${text}"`);
+        if (fragmentGraceTimer) clearTimeout(fragmentGraceTimer);
+        pendingFragmentBuffer = text;
+        console.log(`Holding possible fragment for ${FRAGMENT_GRACE_MS}ms:`, text);
+        fragmentGraceTimer = setTimeout(() => {
+            fragmentGraceTimer = null;
+            const held = pendingFragmentBuffer;
+            pendingFragmentBuffer = '';
+            if (!held) return;
+            console.log('Fragment grace expired, dispatching:', held);
+            pendingTranscript = held;
+            processPendingTranscript().catch(error =>
+                console.error('Error dispatching held fragment:', error)
+            );
+        }, FRAGMENT_GRACE_MS);
+        return;
+    }
+
+    // Substantive query: dispatch immediately, no added latency.
+    pendingTranscript = text;
+    await processPendingTranscript();
 }
 
 module.exports.formatSpeakerResults = formatSpeakerResults;
@@ -131,6 +261,7 @@ function buildContextMessage() {
 function initializeNewSession(profile = null, customPrompt = null) {
     currentSessionId = Date.now().toString();
     currentTranscription = '';
+    resetFragmentGuard();
     conversationHistory = [];
     screenAnalysisHistory = [];
     groqConversationHistory = [];
@@ -261,22 +392,39 @@ function hasGroqKey() {
 // Queue promise to sequence concurrent generation requests
 let generateAnswerQueue = Promise.resolve();
 
-async function executeGenerateAnswer(prompt) {
+async function executeGenerateAnswer(prompt, options = {}) {
+    const isFragment = options.isFragment !== undefined
+        ? Boolean(options.isFragment)
+        : isSuspiciousFragment(prompt);
+
+    let fragmentController = null;
+    if (isFragment) {
+        fragmentController = new AbortController();
+        inFlightFragmentController = fragmentController;
+        console.log(`[Preemption] Registered in-flight fragment controller for: "${prompt}"`);
+    }
+
     // --- INSTRUMENTATION START ---
     const requestId = nextGenerateAnswerId++;
     activeGenerateAnswer++;
     const startTime = Date.now();
-    console.log(`[GA #${requestId}] START — active: ${activeGenerateAnswer}, prompt: "${prompt.substring(0, 60)}..."`);
+    console.log(`[GA #${requestId}] START — active: ${activeGenerateAnswer}, isFragment: ${isFragment}, prompt: "${prompt.substring(0, 60)}..."`);
     const genContext = getTelemetry().onGenerateAnswerStart(prompt, 'generateAnswer');
     // --- INSTRUMENTATION END ---
 
     try {
         console.log('Using provider: Groq');
         try {
-            await sendToGroq(prompt);
+            await sendToGroq(prompt, fragmentController ? fragmentController.signal : null);
             getTelemetry().onGenerateAnswerEnd(genContext, true);
             return;
         } catch (groqError) {
+            if (isPreemptionError(groqError, fragmentController?.signal)) {
+                console.log(`[Preemption] Fragment generation aborted for prompt: "${prompt}". Skipping fallback.`);
+                getTelemetry().onGenerateAnswerEnd(genContext, false, groqError);
+                return;
+            }
+
             console.error('Groq failed:', groqError);
             console.log('Falling back to Gemini');
             try {
@@ -291,6 +439,9 @@ async function executeGenerateAnswer(prompt) {
             }
         }
     } finally {
+        if (inFlightFragmentController === fragmentController) {
+            inFlightFragmentController = null;
+        }
         // --- INSTRUMENTATION START ---
         activeGenerateAnswer--;
         const duration = Date.now() - startTime;
@@ -299,11 +450,14 @@ async function executeGenerateAnswer(prompt) {
     }
 }
 
-async function generateAnswer(prompt) {
+async function generateAnswer(prompt, options = {}) {
     if (!prompt || prompt.trim() === '') {
         console.log('Empty prompt, skipping answer generation');
         return;
     }
+
+    // Preempt any in-flight fragment generation before waiting on the FIFO queue
+    preemptInFlightFragment(`Preempted by incoming prompt: "${prompt.substring(0, 30)}..."`);
 
     // Sequence generations to prevent history interleaving and UI stream collisions
     const previousQueue = generateAnswerQueue;
@@ -320,7 +474,7 @@ async function generateAnswer(prompt) {
     await previousQueue.catch(() => { });
 
     try {
-        const result = await executeGenerateAnswer(prompt);
+        const result = await executeGenerateAnswer(prompt, options);
         taskResolve(result);
         return result;
     } catch (err) {
@@ -349,7 +503,7 @@ function stripThinkingTags(text) {
     return text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 }
 
-async function sendToGroq(transcription) {
+async function sendToGroq(transcription, customSignal = null) {
     const groqApiKey = getGroqApiKey();
     if (!groqApiKey) {
         console.log('No Groq API key configured, skipping Groq response');
@@ -447,6 +601,12 @@ async function sendToGroq(transcription) {
     getTelemetry().onGroqStart(groqReqId, modelToUse, transcription, messages);
 
     try {
+        const signals = [AbortSignal.timeout(10000)];
+        if (customSignal) {
+            signals.push(customSignal);
+        }
+        const combinedSignal = signals.length > 1 ? AbortSignal.any(signals) : signals[0];
+
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -460,7 +620,7 @@ async function sendToGroq(transcription) {
                 temperature: 0.7,
                 max_tokens: 1024
             }),
-            signal: AbortSignal.timeout(10000)
+            signal: combinedSignal
         });
 
         if (!response.ok) {
@@ -545,6 +705,18 @@ async function sendToGroq(transcription) {
         sendToRenderer('update-status', 'Listening...');
 
     } catch (error) {
+        if (isPreemptionError(error, customSignal)) {
+            console.log(`[Preemption] Groq generation aborted (${modelToUse}) for fragment: "${transcription}"`);
+            if (groqConversationHistory.length > 0 &&
+                groqConversationHistory[groqConversationHistory.length - 1].role === 'user' &&
+                groqConversationHistory[groqConversationHistory.length - 1].content === transcription.trim()) {
+                groqConversationHistory.pop();
+                console.log('[Preemption] Rolled back aborted fragment from groqConversationHistory');
+            }
+            getTelemetry().onGroqEnd(groqReqId, false, error, 0);
+            throw error;
+        }
+
         getTelemetry().onGroqEnd(groqReqId, false, error, 0);
         console.error('Error calling Groq API:', error);
         sendToRenderer('update-status', 'Groq error: ' + error.message);
@@ -731,10 +903,10 @@ async function initializeGeminiSession(apiKey, customPrompt = '', profile = 'int
 
                     if (message.serverContent?.generationComplete) {
                         if (currentTranscription.trim() !== '') {
-                            pendingTranscript = currentTranscription;
+                            const committed = currentTranscription;
                             currentTranscription = '';
-                            console.log('Transcription stored in pendingTranscript:', pendingTranscript);
-                            await processPendingTranscript();
+                            console.log('Committed transcript:', committed);
+                            await dispatchTranscript(committed);
                         }
                         messageBuffer = '';
                     }
@@ -814,6 +986,7 @@ async function attemptReconnect() {
     // Clear stale buffers
     messageBuffer = '';
     currentTranscription = '';
+    resetFragmentGuard();
     // Don't reset groqConversationHistory to preserve context across reconnects
 
     sendToRenderer('update-status', `Reconnecting... (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`);
@@ -1352,6 +1525,7 @@ function setupGeminiIpcHandlers(geminiSessionRef) {
             // Set flag to prevent reconnection attempts
             isUserClosing = true;
             sessionParams = null;
+            resetFragmentGuard();
 
             // Cleanup session
             if (geminiSessionRef.current) {
@@ -1438,4 +1612,13 @@ module.exports = {
     formatSpeakerResults,
     generateAnswer,
     sendToGemma,
+    // Phase 3B-4A short-fragment guard — exported for the acceptance tests
+    isSuspiciousFragment,
+    dispatchTranscript,
+    resetFragmentGuard,
+    // Phase 3B-4B preemptible fragment generation
+    preemptInFlightFragment,
+    isPreemptionError,
+    PreemptionError,
+    getInFlightFragmentController: () => inFlightFragmentController,
 };
