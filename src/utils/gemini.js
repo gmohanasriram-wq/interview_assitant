@@ -1,4 +1,4 @@
-const { GoogleGenAI, Modality } = require('@google/genai');
+const { GoogleGenAI, Modality, EndSensitivity } = require('@google/genai');
 const { BrowserWindow, ipcMain } = require('electron');
 const { spawn } = require('child_process');
 const { saveDebugAudio } = require('../audioUtils');
@@ -775,6 +775,16 @@ async function initializeGeminiSession(apiKey, customPrompt = '', profile = 'int
                     maxSpeakerCount: 2,
                 },
                 contextWindowCompression: { slidingWindow: {} },
+                // Tolerate natural intra-utterance pauses so the server does not commit
+                // end-of-turn mid-sentence (which dropped the final question entirely).
+                // END_SENSITIVITY_LOW + 1500ms selected by Phase 3B-3 controlled experiment.
+                realtimeInputConfig: {
+                    automaticActivityDetection: {
+                        disabled: false,
+                        endOfSpeechSensitivity: EndSensitivity.END_SENSITIVITY_LOW,
+                        silenceDurationMs: 1500,
+                    },
+                },
                 speechConfig: { languageCode: language },
                 systemInstruction: {
                     parts: [{ text: 'CRITICAL INSTRUCTION: You are an audio transcription listener only. DO NOT speak, do not reply, do not answer questions, and do not produce any audible or verbal output. Never generate audio response. Always remain completely silent.\n\n' + systemPrompt }],
